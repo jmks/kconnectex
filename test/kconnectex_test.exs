@@ -2,6 +2,17 @@ defmodule KconnectexTest do
   use ExUnit.Case, async: true
 
   defmodule FakeAdapter do
+    def call(%{url: "badconn" <> _}, _) do
+      {:error, :econnrefused}
+    end
+
+    def call(%{url: "badjson" <> _}, _) do
+      %Tesla.Env{
+        status: 200,
+        body: "badjson"
+      }
+    end
+
     def call(%{url: "localhost/"}, _) do
       %Tesla.Env{
         status: 200,
@@ -11,13 +22,6 @@ defmodule KconnectexTest do
             "commit" => "e5741b90cde98052",
             "kafka_cluster_id" => "I4ZmrWqfT2e-upky_4fdPA"
           })
-      }
-    end
-
-    def call(%{url: "badjson/"}, _) do
-      %Tesla.Env{
-        status: 200,
-        body: "badjson"
       }
     end
 
@@ -39,6 +43,10 @@ defmodule KconnectexTest do
 
   test "GET / with bad JSON" do
     assert {:error, %Jason.DecodeError{}} = Kconnectex.info(client("badjson"))
+  end
+
+  test "GET / with no connection" do
+    assert Kconnectex.info(client("badconn")) == {:error, :econnrefused}
   end
 
   test "GET /connectors" do
