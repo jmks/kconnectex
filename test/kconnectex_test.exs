@@ -30,9 +30,7 @@ defmodule KconnectexTest do
   end
 
   test "GET /" do
-    client = Kconnectex.client("localhost", FakeAdapter)
-
-    assert Kconnectex.info(client) == %{
+    assert Kconnectex.info(client()) == %{
              "version" => "5.5.0",
              "commit" => "e5741b90cde98052",
              "kafka_cluster_id" => "I4ZmrWqfT2e-upky_4fdPA"
@@ -40,16 +38,14 @@ defmodule KconnectexTest do
   end
 
   test "GET / with bad JSON" do
-    client = Kconnectex.client("badjson", FakeAdapter)
-
-    assert {:error, %Jason.DecodeError{}} = Kconnectex.info(client)
+    assert {:error, %Jason.DecodeError{}} = Kconnectex.info(client("badjson"))
   end
 
   test "GET /connectors" do
-    assert Kconnectex.connectors(client("localhost")) == ["replicator", "debezium"]
+    assert Kconnectex.connectors(client()) == ["replicator", "debezium"]
   end
 
-  defp client(base) do
-    Kconnectex.client(base, FakeAdapter)
+  defp client(base_url \\ "localhost") do
+    Kconnectex.client(base_url, FakeAdapter)
   end
 end
