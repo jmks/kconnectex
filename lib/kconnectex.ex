@@ -30,4 +30,11 @@ defmodule Kconnectex do
         {:error, env}
     end
   end
+
+  def connectors(client) do
+    with %{status: 200, body: body} <- Tesla.get(client, "/connectors"),
+         {:ok, response} <- Jason.decode(body) do
+      response
+    end
+  end
 end

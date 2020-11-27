@@ -20,9 +20,16 @@ defmodule KconnectexTest do
         body: "badjson"
       }
     end
+
+    def call(%{url: "localhost/connectors"}, _) do
+      %Tesla.Env{
+        status: 200,
+        body: Jason.encode!(["replicator", "debezium"])
+      }
+    end
   end
 
-  test "/" do
+  test "GET /" do
     client = Kconnectex.client("localhost", FakeAdapter)
 
     assert Kconnectex.info(client) == %{
@@ -32,9 +39,17 @@ defmodule KconnectexTest do
            }
   end
 
-  test "/ with bad JSON" do
+  test "GET / with bad JSON" do
     client = Kconnectex.client("badjson", FakeAdapter)
 
     assert {:error, %Jason.DecodeError{}} = Kconnectex.info(client)
+  end
+
+  test "GET /connectors" do
+    assert Kconnectex.connectors(client("localhost")) == ["replicator", "debezium"]
+  end
+
+  defp client(base) do
+    Kconnectex.client(base, FakeAdapter)
   end
 end
