@@ -37,13 +37,29 @@ defmodule Kconnectex do
     handle_response(Tesla.get(client, "/connectors/#{connector}/status"))
   end
 
+  def restart(client, connector) do
+    handle_response(Tesla.post(client, "/connectors/#{connector}/restart", ""))
+  end
+
   defp handle_response(response) do
-    with %{status: 200, body: body} <- response,
-         {:ok, json} <- Jason.decode(body) do
-      json
-    else
-      {:error, json_error} -> {:error, json_error}
-      env -> {:error, env}
+    case response do
+      %{status: 200, body: ""} ->
+        :ok
+
+      %{status: 200, body: body} ->
+        case Jason.decode(body) do
+          {:ok, json} -> json
+          otherwise -> otherwise
+        end
+
+      %{status: 409} ->
+        {:error, :rebalancing}
+
+      {:error, err} ->
+        {:error, err}
+
+      env ->
+        {:error, env}
     end
   end
 end

@@ -19,6 +19,13 @@ defmodule KconnectexTest do
       }
     end
 
+    def call(%{url: "409" <> _}, _) do
+      %Tesla.Env{
+        status: 409,
+        body: nil
+      }
+    end
+
     def call(%{url: "localhost/"}, _) do
       %Tesla.Env{
         status: 200,
@@ -80,6 +87,13 @@ defmodule KconnectexTest do
           })
       }
     end
+
+    def call(%{method: :post, url: "localhost/connectors/debezium/restart"}, _) do
+      %Tesla.Env{
+        status: 200,
+        body: ""
+      }
+    end
   end
 
   test "GET /" do
@@ -127,6 +141,14 @@ defmodule KconnectexTest do
     assert Map.has_key?(status["connector"], "state")
     assert Map.has_key?(status, "tasks")
     assert Map.has_key?(status["tasks"] |> List.first(), "state")
+  end
+
+  test "POST /connectors/:connector/restart" do
+    assert :ok == Kconnectex.restart(client(), "debezium")
+  end
+
+  test "POST /connectors/:connector/restart when rebalancing" do
+    assert {:error, :rebalancing} == Kconnectex.restart(client("409"), "debezium")
   end
 
   defp client(base_url \\ "localhost") do
