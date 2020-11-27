@@ -94,6 +94,20 @@ defmodule KconnectexTest do
         body: ""
       }
     end
+
+    def call(%{method: :put, url: "localhost/connectors/debezium/pause"}, _) do
+      %Tesla.Env{
+        status: 202,
+        body: ""
+      }
+    end
+
+    def call(%{method: :put, url: "localhost/connectors/debezium/resume"}, _) do
+      %Tesla.Env{
+        status: 202,
+        body: ""
+      }
+    end
   end
 
   test "GET /" do
@@ -149,6 +163,22 @@ defmodule KconnectexTest do
 
   test "POST /connectors/:connector/restart when rebalancing" do
     assert {:error, :rebalancing} == Kconnectex.restart(client("409"), "debezium")
+  end
+
+  test "PUT /connectors/:connector/pause" do
+    assert :ok == Kconnectex.pause(client(), "debezium")
+  end
+
+  test "PUT /connectors/:connector/pause when rebalancing" do
+    assert {:error, :rebalancing} == Kconnectex.pause(client("409"), "debezium")
+  end
+
+  test "PUT /connectors/:connector/resume" do
+    assert :ok == Kconnectex.resume(client(), "debezium")
+  end
+
+  test "PUT /connectors/:connector/resume when rebalancing" do
+    assert {:error, :rebalancing} == Kconnectex.resume(client("409"), "debezium")
   end
 
   defp client(base_url \\ "localhost") do

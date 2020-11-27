@@ -41,9 +41,17 @@ defmodule Kconnectex do
     handle_response(Tesla.post(client, "/connectors/#{connector}/restart", ""))
   end
 
+  def pause(client, connector) do
+    handle_response(Tesla.put(client, "/connectors/#{connector}/pause", ""))
+  end
+
+  def resume(client, connector) do
+    handle_response(Tesla.put(client, "/connectors/#{connector}/resume", ""))
+  end
+
   defp handle_response(response) do
     case response do
-      %{status: 200, body: ""} ->
+      %{status: status, body: ""} when status in [200, 202] ->
         :ok
 
       %{status: 200, body: body} ->
