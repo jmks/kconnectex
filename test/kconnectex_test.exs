@@ -58,6 +58,28 @@ defmodule KconnectexTest do
         body: Jason.encode!(@debezium_config)
       }
     end
+
+    def call(%{url: "localhost/connectors/debezium/status"}, _) do
+      %Tesla.Env{
+        status: 200,
+        body:
+          Jason.encode!(%{
+            name: "debezium",
+            connector: %{
+              state: "RUNNING",
+              worker_id: "fakehost:8083"
+            },
+            tasks: [
+              %{
+                id: 0,
+                state: "FAILED",
+                worker_id: "fakehost:8083",
+                trace: "org.apache.kafka.common.errors.RecordTooLargeException\n"
+              }
+            ]
+          })
+      }
+    end
   end
 
   test "GET /" do
@@ -95,6 +117,16 @@ defmodule KconnectexTest do
     config = Kconnectex.config(client(), "debezium")
 
     assert config["connector.class"] == "io.debezium.DebeziumConnector"
+  end
+
+  test "GET /connectors/:connector/status" do
+    status = Kconnectex.status(client(), "debezium")
+
+    assert status["name"] == "debezium"
+    assert Map.has_key?(status, "connector")
+    assert Map.has_key?(status["connector"], "state")
+    assert Map.has_key?(status, "tasks")
+    assert Map.has_key?(status["tasks"] |> List.first(), "state")
   end
 
   defp client(base_url \\ "localhost") do
