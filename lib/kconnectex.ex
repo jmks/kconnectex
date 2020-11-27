@@ -25,6 +25,14 @@ defmodule Kconnectex do
     handle_response(Tesla.get(client, "/connectors"))
   end
 
+  def connector(client, connector) do
+    handle_response(Tesla.get(client, "/connectors/#{connector}"))
+  end
+
+  def config(client, connector) do
+    handle_response(Tesla.get(client, "/connectors/#{connector}/config"))
+  end
+
   defp handle_response(response) do
     with %{status: 200, body: body} <- response,
          {:ok, json} <- Jason.decode(body) do

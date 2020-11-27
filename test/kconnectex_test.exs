@@ -2,6 +2,12 @@ defmodule KconnectexTest do
   use ExUnit.Case, async: true
 
   defmodule FakeAdapter do
+    @debezium_config %{
+      "connector.class" => "io.debezium.DebeziumConnector",
+      "tasks.max" => "1",
+      "rotate.interval.ms" => "10000"
+    }
+
     def call(%{url: "badconn" <> _}, _) do
       {:error, :econnrefused}
     end
@@ -31,6 +37,27 @@ defmodule KconnectexTest do
         body: Jason.encode!(["replicator", "debezium"])
       }
     end
+
+    def call(%{url: "localhost/connectors/debezium"}, _) do
+      %Tesla.Env{
+        status: 200,
+        body:
+          Jason.encode!(%{
+            name: "debezium",
+            config: @debezium_config,
+            tasks: [
+              %{connector: "debezium-connector", task: 1}
+            ]
+          })
+      }
+    end
+
+    def call(%{url: "localhost/connectors/debezium/config"}, _) do
+      %Tesla.Env{
+        status: 200,
+        body: Jason.encode!(@debezium_config)
+      }
+    end
   end
 
   test "GET /" do
@@ -51,6 +78,23 @@ defmodule KconnectexTest do
 
   test "GET /connectors" do
     assert Kconnectex.connectors(client()) == ["replicator", "debezium"]
+  end
+
+  test "GET /connectors/:connector" do
+    response = Kconnectex.connector(client(), "debezium")
+
+    assert response["name"] == "debezium"
+    assert Map.has_key?(response, "config")
+    assert Map.has_key?(response, "tasks")
+  end
+
+  @tag :skip
+  test "GET /connectors/:connector with a bad connector"
+
+  test "GET /connectors/:connector/config" do
+    config = Kconnectex.config(client(), "debezium")
+
+    assert config["connector.class"] == "io.debezium.DebeziumConnector"
   end
 
   defp client(base_url \\ "localhost") do
