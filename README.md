@@ -6,9 +6,7 @@ Elixir API wrapper for the [Kafka Connect API](https://docs.confluent.io/platfor
 
 * https://docs.confluent.io/platform/current/connect/references/restapi.html#post--connectors
 * https://docs.confluent.io/platform/current/connect/references/restapi.html#put--connectors-(string-name)-config
-* Move `info` to `Kconnectex.Cluster.info`
-* Move rest (connector functions) to `Kconnectex.Connector`
-* Add Connect Containerfile
+* Add Connect Containerfile / docker-compose
 * Add integration tests
 
 ## Installation

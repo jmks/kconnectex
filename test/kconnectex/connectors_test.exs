@@ -1,5 +1,7 @@
-defmodule KconnectexTest do
+defmodule Kconnectex.ConnectorsTest do
   use ExUnit.Case, async: true
+
+  alias Kconnectex.Connectors
 
   defmodule FakeAdapter do
     @debezium_config %{
@@ -106,11 +108,11 @@ defmodule KconnectexTest do
   end
 
   test "GET /connectors" do
-    assert Kconnectex.connectors(client()) == ["replicator", "debezium"]
+    assert Connectors.connectors(client()) == ["replicator", "debezium"]
   end
 
   test "GET /connectors/:connector" do
-    response = Kconnectex.connector(client(), "debezium")
+    response = Connectors.info(client(), "debezium")
 
     assert response["name"] == "debezium"
     assert Map.has_key?(response, "config")
@@ -121,13 +123,13 @@ defmodule KconnectexTest do
   test "GET /connectors/:connector with a bad connector"
 
   test "GET /connectors/:connector/config" do
-    config = Kconnectex.config(client(), "debezium")
+    config = Connectors.config(client(), "debezium")
 
     assert config["connector.class"] == "io.debezium.DebeziumConnector"
   end
 
   test "GET /connectors/:connector/status" do
-    status = Kconnectex.status(client(), "debezium")
+    status = Connectors.status(client(), "debezium")
 
     assert status["name"] == "debezium"
     assert Map.has_key?(status, "connector")
@@ -137,35 +139,35 @@ defmodule KconnectexTest do
   end
 
   test "POST /connectors/:connector/restart" do
-    assert :ok == Kconnectex.restart(client(), "debezium")
+    assert :ok == Connectors.restart(client(), "debezium")
   end
 
   test "POST /connectors/:connector/restart when rebalancing" do
-    assert {:error, :rebalancing} == Kconnectex.restart(client("409"), "debezium")
+    assert {:error, :rebalancing} == Connectors.restart(client("409"), "debezium")
   end
 
   test "PUT /connectors/:connector/pause" do
-    assert :ok == Kconnectex.pause(client(), "debezium")
+    assert :ok == Connectors.pause(client(), "debezium")
   end
 
   test "PUT /connectors/:connector/pause when rebalancing" do
-    assert {:error, :rebalancing} == Kconnectex.pause(client("409"), "debezium")
+    assert {:error, :rebalancing} == Connectors.pause(client("409"), "debezium")
   end
 
   test "PUT /connectors/:connector/resume" do
-    assert :ok == Kconnectex.resume(client(), "debezium")
+    assert :ok == Connectors.resume(client(), "debezium")
   end
 
   test "PUT /connectors/:connector/resume when rebalancing" do
-    assert {:error, :rebalancing} == Kconnectex.resume(client("409"), "debezium")
+    assert {:error, :rebalancing} == Connectors.resume(client("409"), "debezium")
   end
 
   test "DELETE /connectors/:connector" do
-    assert :ok == Kconnectex.delete(client(), "debezium")
+    assert :ok == Connectors.delete(client(), "debezium")
   end
 
   test "DELETE /connectors/:connector when rebalancing" do
-    assert {:error, :rebalancing} == Kconnectex.delete(client("409"), "debezium")
+    assert {:error, :rebalancing} == Connectors.delete(client("409"), "debezium")
   end
 
   defp client(base_url \\ "localhost") do
