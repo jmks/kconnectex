@@ -6,11 +6,11 @@ defmodule Kconnectex.ClusterTest do
       %Tesla.Env{
         status: 200,
         body:
-        Jason.encode!(%{
-              "version" => "5.5.0",
-              "commit" => "e5741b90cde98052",
-              "kafka_cluster_id" => "I4ZmrWqfT2e-upky_4fdPA"
-                      })
+          Jason.encode!(%{
+            "version" => "5.5.0",
+            "commit" => "e5741b90cde98052",
+            "kafka_cluster_id" => "I4ZmrWqfT2e-upky_4fdPA"
+          })
       }
     end
 
@@ -28,10 +28,10 @@ defmodule Kconnectex.ClusterTest do
 
   test "GET /" do
     assert Kconnectex.Cluster.info(client()) == %{
-      "version" => "5.5.0",
-      "commit" => "e5741b90cde98052",
-      "kafka_cluster_id" => "I4ZmrWqfT2e-upky_4fdPA"
-    }
+             "version" => "5.5.0",
+             "commit" => "e5741b90cde98052",
+             "kafka_cluster_id" => "I4ZmrWqfT2e-upky_4fdPA"
+           }
   end
 
   test "GET / with bad JSON" do
