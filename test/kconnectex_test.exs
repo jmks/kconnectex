@@ -45,6 +45,13 @@ defmodule KconnectexTest do
       }
     end
 
+    def call(%{method: :delete, url: "localhost/connectors/debezium"}, _) do
+      %Tesla.Env{
+        status: 202,
+        body: ""
+      }
+    end
+
     def call(%{url: "localhost/connectors/debezium"}, _) do
       %Tesla.Env{
         status: 200,
@@ -179,6 +186,14 @@ defmodule KconnectexTest do
 
   test "PUT /connectors/:connector/resume when rebalancing" do
     assert {:error, :rebalancing} == Kconnectex.resume(client("409"), "debezium")
+  end
+
+  test "DELETE /connectors/:connector" do
+    assert :ok == Kconnectex.delete(client(), "debezium")
+  end
+
+  test "DELETE /connectors/:connector when rebalancing" do
+    assert {:error, :rebalancing} == Kconnectex.delete(client("409"), "debezium")
   end
 
   defp client(base_url \\ "localhost") do

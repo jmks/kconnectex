@@ -49,6 +49,10 @@ defmodule Kconnectex do
     handle_response(Tesla.put(client, "/connectors/#{connector}/resume", ""))
   end
 
+  def delete(client, connector) do
+    handle_response(Tesla.delete(client, "/connectors/#{connector}"))
+  end
+
   defp handle_response(response) do
     case response do
       %{status: status, body: ""} when status in [200, 202] ->
