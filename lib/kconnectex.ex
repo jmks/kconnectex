@@ -19,10 +19,6 @@ defmodule Kconnectex do
     Tesla.client(middleware, adapter)
   end
 
-  def info(client) do
-    handle_response(Tesla.get(client, "/"))
-  end
-
   def connectors(client) do
     handle_response(Tesla.get(client, "/connectors"))
   end
