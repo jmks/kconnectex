@@ -3,6 +3,8 @@ defmodule Kconnectex do
   Documentation for `Kconnectex`.
   """
 
+  import Kconnectex.Util
+
   def client(url, adapter \\ Tesla.Adapter.Hackney) do
     middleware = [
       {Tesla.Middleware.BaseUrl, url},
@@ -51,27 +53,5 @@ defmodule Kconnectex do
 
   def delete(client, connector) do
     handle_response(Tesla.delete(client, "/connectors/#{connector}"))
-  end
-
-  defp handle_response(response) do
-    case response do
-      %{status: status, body: ""} when status in [200, 202] ->
-        :ok
-
-      %{status: 200, body: body} ->
-        case Jason.decode(body) do
-          {:ok, json} -> json
-          otherwise -> otherwise
-        end
-
-      %{status: 409} ->
-        {:error, :rebalancing}
-
-      {:error, err} ->
-        {:error, err}
-
-      env ->
-        {:error, env}
-    end
   end
 end
