@@ -34,6 +34,15 @@ defmodule Kconnectex.ClusterTest do
            }
   end
 
+  @tag :integration
+  test "GET / integration" do
+    import IntegrationHelpers
+
+    cluster_info = Kconnectex.Cluster.info(connect_client())
+
+    assert cluster_info["version"] == "2.6.0"
+  end
+
   test "GET / with bad JSON" do
     assert {:error, %Jason.DecodeError{}} = Kconnectex.Cluster.info(client("badjson"))
   end
