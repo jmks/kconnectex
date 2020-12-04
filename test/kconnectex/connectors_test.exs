@@ -14,96 +14,68 @@ defmodule Kconnectex.ConnectorsTest do
       {:error, :econnrefused}
     end
 
-    def call(%{url: "badjson" <> _}, _) do
-      %Tesla.Env{
-        status: 200,
-        body: "badjson"
-      }
-    end
-
     def call(%{url: "409" <> _}, _) do
-      %Tesla.Env{
-        status: 409,
-        body: nil
-      }
+      {:ok, %Tesla.Env{status: 409, body: nil}}
     end
 
     def call(%{url: "localhost/connectors"}, _) do
-      %Tesla.Env{
-        status: 200,
-        body: Jason.encode!(["replicator", "debezium"])
-      }
+      {:ok, %Tesla.Env{status: 200, body: ["replicator", "debezium"]}}
     end
 
     def call(%{method: :delete, url: "localhost/connectors/debezium"}, _) do
-      %Tesla.Env{
-        status: 202,
-        body: ""
-      }
+      {:ok, %Tesla.Env{status: 202, body: ""}}
     end
 
     def call(%{url: "localhost/connectors/debezium"}, _) do
-      %Tesla.Env{
-        status: 200,
-        body:
-          Jason.encode!(%{
-            name: "debezium",
-            config: @debezium_config,
-            tasks: [
-              %{connector: "debezium-connector", task: 1}
-            ]
-          })
-      }
+      {:ok,
+       %Tesla.Env{
+         status: 200,
+         body: %{
+           "name" => "debezium",
+           "config" => @debezium_config,
+           "tasks" => [
+             %{"connector" => "debezium-connector", "task" => 1}
+           ]
+         }
+       }}
     end
 
     def call(%{url: "localhost/connectors/debezium/config"}, _) do
-      %Tesla.Env{
-        status: 200,
-        body: Jason.encode!(@debezium_config)
-      }
+      {:ok, %Tesla.Env{status: 200, body: @debezium_config}}
     end
 
     def call(%{url: "localhost/connectors/debezium/status"}, _) do
-      %Tesla.Env{
-        status: 200,
-        body:
-          Jason.encode!(%{
-            name: "debezium",
-            connector: %{
-              state: "RUNNING",
-              worker_id: "fakehost:8083"
-            },
-            tasks: [
-              %{
-                id: 0,
-                state: "FAILED",
-                worker_id: "fakehost:8083",
-                trace: "org.apache.kafka.common.errors.RecordTooLargeException\n"
-              }
-            ]
-          })
-      }
+      {:ok,
+       %Tesla.Env{
+         status: 200,
+         body: %{
+           "name" => "debezium",
+           "connector" => %{
+             "state" => "RUNNING",
+             "worker_id" => "fakehost:8083"
+           },
+           "tasks" => [
+             %{
+               "id" => 0,
+               "state" => "FAILED",
+               "worker_id" => "fakehost:8083",
+               "trace" => "org.apache.kafka.common.errors.RecordTooLargeException\n"
+             }
+           ]
+         }
+       }}
     end
 
     def call(%{method: :post, url: "localhost/connectors/debezium/restart"}, _) do
-      %Tesla.Env{
-        status: 200,
-        body: ""
-      }
+      {:ok, %Tesla.Env{status: 200, body: ""}}
     end
 
     def call(%{method: :put, url: "localhost/connectors/debezium/pause"}, _) do
-      %Tesla.Env{
-        status: 202,
-        body: ""
-      }
+      {:ok, %Tesla.Env{status: 202, body: ""}}
     end
 
     def call(%{method: :put, url: "localhost/connectors/debezium/resume"}, _) do
-      %Tesla.Env{
-        status: 202,
-        body: ""
-      }
+      {:ok, %Tesla.Env{status: 202, body: ""}}
     end
   end
 
@@ -120,7 +92,9 @@ defmodule Kconnectex.ConnectorsTest do
   end
 
   @tag :skip
-  test "GET /connectors/:connector with a bad connector"
+  test "GET /connectors/:connector with a bad connector" do
+    assert Connectors.info(client(), "unknown") == {:error, :no_connector}
+  end
 
   test "GET /connectors/:connector/config" do
     config = Connectors.config(client(), "debezium")

@@ -10,9 +10,7 @@ defmodule Kconnectex.UtilTest do
     end
 
     test "returns deserialized JSON for success with a body" do
-      assert handle_response({:ok, %{status: 200, body: ~s({"hello":"world"})}}) == %{
-               "hello" => "world"
-             }
+      assert handle_response({:ok, %{status: 200, body: %{"hello" => "world"}}}) == %{"hello" => "world"}
     end
 
     test "returns rebalancing error on 409 status" do
