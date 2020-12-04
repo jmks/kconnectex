@@ -7,6 +7,9 @@ defmodule Kconnectex.Util do
       {:ok, %{status: 200, body: body}} ->
         body
 
+      {:ok, %{status: 404}} ->
+        {:error, :not_found}
+
       {:ok, %{status: 409}} ->
         {:error, :rebalancing}
 

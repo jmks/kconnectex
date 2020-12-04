@@ -40,6 +40,10 @@ defmodule Kconnectex.ConnectorsTest do
        }}
     end
 
+    def call(%{url: "localhost/connectors/unknown"}, _) do
+      {:ok, %Tesla.Env{status: 404, body: ""}}
+    end
+
     def call(%{url: "localhost/connectors/debezium/config"}, _) do
       {:ok, %Tesla.Env{status: 200, body: @debezium_config}}
     end
@@ -91,9 +95,8 @@ defmodule Kconnectex.ConnectorsTest do
     assert Map.has_key?(response, "tasks")
   end
 
-  @tag :skip
-  test "GET /connectors/:connector with a bad connector" do
-    assert Connectors.info(client(), "unknown") == {:error, :no_connector}
+  test "GET /connectors/:connector with an unknown connector" do
+    assert Connectors.info(client(), "unknown") == {:error, :not_found}
   end
 
   test "GET /connectors/:connector/config" do
