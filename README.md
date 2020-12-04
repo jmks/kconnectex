@@ -2,12 +2,28 @@
 
 Elixir API wrapper for the [Kafka Connect API](https://docs.confluent.io/platform/current/connect/references/restapi.html)
 
+Currently under development.
+
 ## TODO
 
 * https://docs.confluent.io/platform/current/connect/references/restapi.html#post--connectors
 * https://docs.confluent.io/platform/current/connect/references/restapi.html#put--connectors-(string-name)-config
-* Add Connect Containerfile / docker-compose
 * Add integration tests
+
+## Development
+
+To run the (unit) tests:
+
+```
+$ mix test
+```
+
+To run the integration tests:
+
+```
+$ docker-compose up
+$ mix test --include integration
+```
 
 ## Installation
 
