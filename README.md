@@ -6,9 +6,9 @@ Currently under development.
 
 ## TODO
 
-* https://docs.confluent.io/platform/current/connect/references/restapi.html#post--connectors
 * https://docs.confluent.io/platform/current/connect/references/restapi.html#put--connectors-(string-name)-config
-* Add integration tests
+* Move integration tests to a file
+* Add more integration tests (with FileStreamSource)
 
 ## Development
 
