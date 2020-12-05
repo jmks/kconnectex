@@ -13,6 +13,9 @@ defmodule Kconnectex.Util do
       {:ok, %{status: 409}} ->
         {:error, :rebalancing}
 
+      {:ok, %{status: status, body: body}} when status in 400..499 ->
+        {:error, body}
+
       {:error, err} ->
         {:error, err}
     end
