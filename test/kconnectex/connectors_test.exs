@@ -21,12 +21,24 @@ defmodule Kconnectex.ConnectorsTest do
     def call(%{method: :post, url: "localhost/connectors", body: body}, _) do
       request_body = Jason.decode!(body)
 
-      {:ok,
-       %Tesla.Env{
-         status: 200,
-         body:
-           Map.put(request_body, "tasks", [%{"connector" => request_body["name"], "task" => 1}])
-       }}
+      env =
+        if Map.has_key?(request_body["config"], "connector.class") do
+          %Tesla.Env{
+            status: 200,
+            body:
+              Map.put(request_body, "tasks", [%{"connector" => request_body["name"], "task" => 1}])
+          }
+        else
+          %Tesla.Env{
+            status: 400,
+            body: %{
+              "error_code" => 400,
+              "message" => "Connector config {name=, topic=, file=} contains no connector type"
+            }
+          }
+        end
+
+      {:ok, env}
     end
 
     def call(%{url: "localhost/connectors"}, _) do
@@ -99,12 +111,43 @@ defmodule Kconnectex.ConnectorsTest do
   end
 
   test "POST /connectors" do
-    config = %{"file" => "some-file.txt", "topic" => "some-topic"}
+    config = %{
+      "connector.class" => "FileStreamSource",
+      "file" => "some-file.txt",
+      "topic" => "some-topic"
+    }
+
     response = Connectors.create(client(), "something-new", config)
 
     assert response["name"] == "something-new"
     assert response["config"] == config
     assert Map.has_key?(response, "tasks")
+  end
+
+  @tag :integration
+  test "POST /connectors integration" do
+    import IntegrationHelpers
+
+    config = %{
+      "connector.class" => "FileStreamSource",
+      "file" => "/kafka/LICENSE",
+      "topic" => "license-stream"
+    }
+
+    response = Connectors.create(connect_client(), "license-stream", config)
+
+    assert is_map(response)
+    assert Connectors.connectors(connect_client()) == ["license-stream"]
+    assert Connectors.delete(connect_client(), "license-stream") == :ok
+  end
+
+  test "POST /connectors with missing config" do
+    config = %{"file" => "some-file.txt", "topic" => "some-topic"}
+    response = Connectors.create(client(), "something-new", config)
+
+    assert {:error, body} = response
+    assert body["error_code"] == 400
+    assert String.ends_with?(body["message"], "contains no connector type")
   end
 
   test "GET /connectors/:connector" do
