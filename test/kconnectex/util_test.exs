@@ -6,10 +6,11 @@ defmodule Kconnectex.UtilTest do
   describe "handle_response" do
     test "returns :ok for success with no body" do
       assert handle_response({:ok, %{status: 200, body: ""}}) == :ok
+      assert handle_response({:ok, %{status: 201, body: ""}}) == :ok
       assert handle_response({:ok, %{status: 202, body: ""}}) == :ok
     end
 
-    test "returns deserialized JSON for success with a body" do
+    test "returns body for success with a body" do
       assert handle_response({:ok, %{status: 200, body: %{"hello" => "world"}}}) == %{
                "hello" => "world"
              }
