@@ -18,6 +18,17 @@ defmodule Kconnectex.ConnectorsTest do
       {:ok, %Tesla.Env{status: 409, body: nil}}
     end
 
+    def call(%{method: :post, url: "localhost/connectors", body: body}, _) do
+      request_body = Jason.decode!(body)
+
+      {:ok,
+       %Tesla.Env{
+         status: 200,
+         body:
+           Map.put(request_body, "tasks", [%{"connector" => request_body["name"], "task" => 1}])
+       }}
+    end
+
     def call(%{url: "localhost/connectors"}, _) do
       {:ok, %Tesla.Env{status: 200, body: ["replicator", "debezium"]}}
     end
@@ -85,6 +96,15 @@ defmodule Kconnectex.ConnectorsTest do
 
   test "GET /connectors" do
     assert Connectors.connectors(client()) == ["replicator", "debezium"]
+  end
+
+  test "POST /connectors" do
+    config = %{"file" => "some-file.txt", "topic" => "some-topic"}
+    response = Connectors.create(client(), "something-new", config)
+
+    assert response["name"] == "something-new"
+    assert response["config"] == config
+    assert Map.has_key?(response, "tasks")
   end
 
   test "GET /connectors/:connector" do

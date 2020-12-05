@@ -5,6 +5,10 @@ defmodule Kconnectex.Connectors do
     handle_response(Tesla.get(client, "/connectors"))
   end
 
+  def create(client, name, config) do
+    handle_response(Tesla.post(client, "/connectors", %{name: name, config: config}))
+  end
+
   def info(client, connector) do
     handle_response(Tesla.get(client, "/connectors/#{connector}"))
   end
