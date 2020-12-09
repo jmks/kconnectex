@@ -4,7 +4,7 @@ defmodule Kconnectex.TasksTest do
   alias Kconnectex.Tasks
 
   defmodule FakeTasksAdapter do
-    def call(%{url: "localhost/connectors/filestream/tasks"}, _) do
+    def call(%{method: :get, url: "localhost/connectors/filestream/tasks"}, _) do
       body = [
         %{
           "id" => %{"connector" => "filestream", "task" => 0},
@@ -20,7 +20,7 @@ defmodule Kconnectex.TasksTest do
       {:ok, %Tesla.Env{status: 200, body: body}}
     end
 
-    def call(%{url: "localhost/connectors/filestream/tasks/0/status"}, _) do
+    def call(%{method: :get, url: "localhost/connectors/filestream/tasks/0/status"}, _) do
       body = %{
         "id" => 0,
         "state" => "RUNNING",
@@ -32,6 +32,10 @@ defmodule Kconnectex.TasksTest do
 
     def call(%{url: "localhost/connectors/filestream/tasks/9/status"}, _) do
       {:ok, %Tesla.Env{status: 404}}
+    end
+
+    def call(%{method: :post, url: "localhost/connectors/filestream/tasks/0/restart"}, _) do
+      {:ok, %Tesla.Env{status: 204, body: ""}}
     end
   end
 
@@ -46,7 +50,7 @@ defmodule Kconnectex.TasksTest do
     assert task["id"]["task"] == 0
   end
 
-  test "GET /connectors/:connector/tasks/:task/status" do
+  test "GET /connectors/:connector/tasks/:task_id/status" do
     response = Tasks.status(client(), "filestream", 0)
 
     assert response["id"] == 0
@@ -54,8 +58,12 @@ defmodule Kconnectex.TasksTest do
     assert Map.has_key?(response, "worker_id")
   end
 
-  test "GET /connectors/:connector/tasks/:task/status with unknown task" do
+  test "GET /connectors/:connector/tasks/:task_id/status with unknown task" do
     assert {:error, :not_found} == Tasks.status(client(), "filestream", 9)
+  end
+
+  test "POST /connectors/:connector/tasks/:task_id/restart" do
+    assert :ok == Tasks.restart(client(), "filestream", 0)
   end
 
   defp client(base_url \\ "localhost") do
