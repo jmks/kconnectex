@@ -1,7 +1,7 @@
 defmodule Kconnectex.Connectors do
   import Kconnectex.Util
 
-  def connectors(client) do
+  def list(client) do
     handle_response(Tesla.get(client, "/connectors"))
   end
 

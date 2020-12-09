@@ -107,7 +107,7 @@ defmodule Kconnectex.ConnectorsTest do
   end
 
   test "GET /connectors" do
-    assert Connectors.connectors(client()) == ["replicator", "debezium"]
+    assert Connectors.list(client()) == ["replicator", "debezium"]
   end
 
   test "POST /connectors" do
@@ -137,7 +137,7 @@ defmodule Kconnectex.ConnectorsTest do
     response = Connectors.create(connect_client(), "license-stream", config)
 
     assert is_map(response)
-    assert Connectors.connectors(connect_client()) == ["license-stream"]
+    assert Connectors.list(connect_client()) == ["license-stream"]
     assert Connectors.delete(connect_client(), "license-stream") == :ok
   end
 
