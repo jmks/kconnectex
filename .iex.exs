@@ -1,4 +1,4 @@
-alias Kconnectex.{Cluster, Connectors}
+alias Kconnectex.{Cluster, Connectors, Tasks}
 
 defmodule Helpers do
   def filestream_config(topic \\ "license-stream", file \\ "/kafka/LICENSE") do
