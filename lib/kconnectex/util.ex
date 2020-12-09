@@ -2,11 +2,7 @@ defmodule Kconnectex.Util do
   def handle_response(response) do
     case response do
       {:ok, %{status: status, body: body}} when status in 200..299 ->
-        if body == "" do
-          :ok
-        else
-          body
-        end
+        if body == "", do: :ok, else: body
 
       {:ok, %{status: 404}} ->
         {:error, :not_found}

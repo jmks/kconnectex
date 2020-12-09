@@ -183,15 +183,16 @@ defmodule Kconnectex.ConnectorsTest do
   end
 
   test "PUT connectors/:connector/config" do
-    response = Connectors.update(
-      client(),
-      "debezium",
-      %{
+    response =
+      Connectors.update(
+        client(),
+        "debezium",
+        %{
           "connector.class" => "io.debezium.DebeziumConnector",
           "tasks.max" => "1",
           "rotate.interval.ms" => "10000"
-      }
-    )
+        }
+      )
 
     assert response["name"] == "debezium"
     assert Map.has_key?(response, "config")

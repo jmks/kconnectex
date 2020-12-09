@@ -11,9 +11,9 @@ defmodule Kconnectex.UtilTest do
     end
 
     test "returns body for success with a body" do
-      assert handle_response({:ok, %{status: 200, body: %{"hello" => "world"}}}) == %{
-               "hello" => "world"
-             }
+      body = %{"hello" => "world"}
+
+      assert handle_response({:ok, %{status: 200, body: body}}) == body
     end
 
     test "returns not found error on 404" do
@@ -25,7 +25,7 @@ defmodule Kconnectex.UtilTest do
     end
 
     test "returns error with body for client errors" do
-      body = %{"err" => "something"}
+      body = %{"error" => "something"}
 
       assert handle_response({:ok, %{status: 400, body: body}}) == {:error, body}
     end
