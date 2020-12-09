@@ -8,6 +8,12 @@ defmodule Helpers do
       "file" => file
     }
   end
+
+  def clear_connectors(client) do
+    client
+    |> Kconnectex.Connectors.list
+    |> Enum.map(&Kconnectex.Connectors.delete(client, &1))
+  end
 end
 
 client = Kconnectex.client("http://0.0.0.0:8083")
