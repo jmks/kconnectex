@@ -7,11 +7,38 @@ Currently under development.
 ## TODO
 
 ### Connectors
-* URL sanitize connector name
+* Support "expand" queries
+  * Where are docs on these?
+
+### Topics
+* get
+* reset
+
+### Connector Plugins
+* get
+* validate config
 
 ### General
 * Move integration tests to a file
+* URL sanitize URL params
 * Add more integration tests (with FileStreamSource)
+* Better API for Clients?
+
+Would be nice to not have to pass "connector" to every function in Connectors?
+```
+client =
+  base_url
+  |> Kconnectex.Client.new
+  |> Kconnectex.Client.adapter(FakeTasksAdapter)
+  |> Kconnectex.Client.connector("filestream")
+
+
+client
+|> Kconnectex.Connectors.status
+|> Access.get("tasks")
+|> Enum.filter(fn %{"state" => state} -> state != "RUNNING")
+|> Enum.map(fn %{"id" => id} -> Kconnectex.Connectors.restart(client, id))
+```
 
 ## Development
 
