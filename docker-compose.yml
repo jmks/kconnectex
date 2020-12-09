@@ -12,12 +12,10 @@ services:
     image: debezium/kafka:1.3
     ports:
       - 9092:9092
+    links:
+      - zookeeper
     environment:
       ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
     depends_on:
       - zookeeper
   debezium:
@@ -28,6 +26,8 @@ services:
       BOOTSTRAP_SERVERS: kafka:9092
       CONFIG_STORAGE_TOPIC: _debezium_config
       OFFSET_STORAGE_TOPIC: _debezium_offsets
+    links:
+      - kafka
     restart: on-failure
     depends_on:
       - kafka
