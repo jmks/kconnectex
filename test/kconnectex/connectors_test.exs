@@ -67,6 +67,20 @@ defmodule Kconnectex.ConnectorsTest do
       {:ok, %Tesla.Env{status: 404, body: ""}}
     end
 
+    def call(%{method: :put, url: "localhost/connectors/debezium/config"}, _) do
+      {:ok,
+       %Tesla.Env{
+         status: 200,
+         body: %{
+           "name" => "debezium",
+           "config" => @debezium_config,
+           "tasks" => [
+             %{"connector" => "debezium-connector", "task" => 1}
+           ]
+         }
+       }}
+    end
+
     def call(%{url: "localhost/connectors/debezium/config"}, _) do
       {:ok, %Tesla.Env{status: 200, body: @debezium_config}}
     end
@@ -166,6 +180,22 @@ defmodule Kconnectex.ConnectorsTest do
     config = Connectors.config(client(), "debezium")
 
     assert config["connector.class"] == "io.debezium.DebeziumConnector"
+  end
+
+  test "PUT connectors/:connector/config" do
+    response = Connectors.update(
+      client(),
+      "debezium",
+      %{
+          "connector.class" => "io.debezium.DebeziumConnector",
+          "tasks.max" => "1",
+          "rotate.interval.ms" => "10000"
+      }
+    )
+
+    assert response["name"] == "debezium"
+    assert Map.has_key?(response, "config")
+    assert Map.has_key?(response, "tasks")
   end
 
   test "GET /connectors/:connector/status" do

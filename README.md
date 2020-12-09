@@ -6,7 +6,10 @@ Currently under development.
 
 ## TODO
 
-* https://docs.confluent.io/platform/current/connect/references/restapi.html#put--connectors-(string-name)-config
+### Connectors
+* URL sanitize connector name
+
+### General
 * Move integration tests to a file
 * Add more integration tests (with FileStreamSource)
 

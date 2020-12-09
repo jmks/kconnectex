@@ -17,6 +17,10 @@ defmodule Kconnectex.Connectors do
     handle_response(Tesla.get(client, "/connectors/#{connector}/config"))
   end
 
+  def update(client, connector, config) do
+    handle_response(Tesla.put(client, "/connectors/#{connector}/config", config))
+  end
+
   def status(client, connector) do
     handle_response(Tesla.get(client, "/connectors/#{connector}/status"))
   end
