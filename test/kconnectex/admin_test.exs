@@ -11,37 +11,29 @@ defmodule Kconnectex.AdminTest do
     end
   end
 
-  @tag :integration
-  test "GET /admin/loggers" do
-    import IntegrationHelpers
-
-    loggers = Kconnectex.Admin.loggers(connect_client())
-
-    assert  %{"org.reflections" => %{"level" => "ERROR"}, "root" => %{"level" => "INFO"}} = loggers
-  end
-
-  @tag :integration
-  test "GET /admin/loggers/:logger" do
-    import IntegrationHelpers
-
-    level = Kconnectex.Admin.logger_level(connect_client(), "root")
-
-    assert %{"level" => "INFO"} = level
-  end
-
   test "PUT /admin/loggers/:logger" do
     assert Kconnectex.Admin.logger_level(client(), "root", "DEBUG") == [
-      "root"
-    ]
+             "root"
+           ]
   end
 
   @tag :integration
-  test "PUT /admin/loggers/:logger integration" do
+  test "loggers" do
     import IntegrationHelpers
+
+    # Reset to defaults; previous test runs may have changed them
+    Kconnectex.Admin.logger_level(connect_client(), "root", "INFO")
+    Kconnectex.Admin.logger_level(connect_client(), "org.reflections", "WARN")
+
+    loggers = Kconnectex.Admin.loggers(connect_client())
+    assert %{"org.reflections" => %{"level" => "WARN"}, "root" => %{"level" => "INFO"}} = loggers
+
+    level = Kconnectex.Admin.logger_level(connect_client(), "root")
+    assert %{"level" => "INFO"} = level
 
     Kconnectex.Admin.logger_level(connect_client(), "root", "DEBUG")
 
-    level = Kconnectex.Admin.logger_level(client(), "root")
+    level = Kconnectex.Admin.logger_level(connect_client(), "root")
     assert %{"level" => "DEBUG"} = level
   end
 
