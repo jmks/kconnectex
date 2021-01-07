@@ -25,20 +25,7 @@ Currently under development.
 * Better API for Clients?
 
 Would be nice to not have to pass "connector" to every function in Connectors?
-```
-client =
-  base_url
-  |> Kconnectex.Client.new
-  |> Kconnectex.Client.adapter(FakeTasksAdapter)
-  |> Kconnectex.Client.connector("filestream")
-
-
-client
-|> Kconnectex.Connectors.status
-|> Access.get("tasks")
-|> Enum.filter(fn %{"state" => state} -> state != "RUNNING")
-|> Enum.map(fn %{"id" => id} -> Kconnectex.Connectors.restart(client, id))
-```
+Wrap all successful in :ok tuples? Is `is_map(result)` annoying yet?
 
 ## Development
 
