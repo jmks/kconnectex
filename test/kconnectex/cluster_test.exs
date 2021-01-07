@@ -2,18 +2,6 @@ defmodule Kconnectex.ClusterTest do
   use ExUnit.Case, async: true
 
   defmodule FakeAdapter do
-    def call(%{url: "localhost/"}, _) do
-      {:ok,
-       %Tesla.Env{
-         status: 200,
-         body: %{
-           "version" => "5.5.0",
-           "commit" => "e5741b90cde98052",
-           "kafka_cluster_id" => "I4ZmrWqfT2e-upky_4fdPA"
-         }
-       }}
-    end
-
     def call(%{url: "badconn" <> _}, _) do
       {:error, :econnrefused}
     end
@@ -34,7 +22,7 @@ defmodule Kconnectex.ClusterTest do
     assert Map.has_key?(cluster_info, "kafka_cluster_id")
   end
 
-  defp client(base_url \\ "localhost") do
+  defp client(base_url) do
     Kconnectex.client(base_url, FakeAdapter)
   end
 end
