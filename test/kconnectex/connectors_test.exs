@@ -1,19 +1,9 @@
 defmodule Kconnectex.ConnectorsTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
 
   alias Kconnectex.Connectors
 
   defmodule FakeAdapter do
-    @debezium_config %{
-      "connector.class" => "io.debezium.DebeziumConnector",
-      "tasks.max" => "1",
-      "rotate.interval.ms" => "10000"
-    }
-
-    def call(%{url: "badconn" <> _}, _) do
-      {:error, :econnrefused}
-    end
-
     def call(%{url: "409" <> _}, _) do
       {:ok, %Tesla.Env{status: 409, body: nil}}
     end
@@ -41,70 +31,8 @@ defmodule Kconnectex.ConnectorsTest do
       {:ok, env}
     end
 
-    def call(%{url: "localhost/connectors"}, _) do
-      {:ok, %Tesla.Env{status: 200, body: ["replicator", "debezium"]}}
-    end
-
-    def call(%{method: :delete, url: "localhost/connectors/debezium"}, _) do
-      {:ok, %Tesla.Env{status: 202, body: ""}}
-    end
-
-    def call(%{url: "localhost/connectors/debezium"}, _) do
-      {:ok,
-       %Tesla.Env{
-         status: 200,
-         body: %{
-           "name" => "debezium",
-           "config" => @debezium_config,
-           "tasks" => [
-             %{"connector" => "debezium-connector", "task" => 1}
-           ]
-         }
-       }}
-    end
-
     def call(%{url: "localhost/connectors/unknown"}, _) do
       {:ok, %Tesla.Env{status: 404, body: ""}}
-    end
-
-    def call(%{method: :put, url: "localhost/connectors/debezium/config"}, _) do
-      {:ok,
-       %Tesla.Env{
-         status: 200,
-         body: %{
-           "name" => "debezium",
-           "config" => @debezium_config,
-           "tasks" => [
-             %{"connector" => "debezium-connector", "task" => 1}
-           ]
-         }
-       }}
-    end
-
-    def call(%{url: "localhost/connectors/debezium/config"}, _) do
-      {:ok, %Tesla.Env{status: 200, body: @debezium_config}}
-    end
-
-    def call(%{url: "localhost/connectors/debezium/status"}, _) do
-      {:ok,
-       %Tesla.Env{
-         status: 200,
-         body: %{
-           "name" => "debezium",
-           "connector" => %{
-             "state" => "RUNNING",
-             "worker_id" => "fakehost:8083"
-           },
-           "tasks" => [
-             %{
-               "id" => 0,
-               "state" => "FAILED",
-               "worker_id" => "fakehost:8083",
-               "trace" => "org.apache.kafka.common.errors.RecordTooLargeException\n"
-             }
-           ]
-         }
-       }}
     end
 
     def call(%{method: :post, url: "localhost/connectors/debezium/restart"}, _) do
@@ -118,10 +46,6 @@ defmodule Kconnectex.ConnectorsTest do
     def call(%{method: :put, url: "localhost/connectors/debezium/resume"}, _) do
       {:ok, %Tesla.Env{status: 202, body: ""}}
     end
-  end
-
-  test "GET /connectors" do
-    assert Connectors.list(client()) == ["replicator", "debezium"]
   end
 
   test "POST /connectors" do
@@ -138,25 +62,12 @@ defmodule Kconnectex.ConnectorsTest do
     assert Map.has_key?(response, "tasks")
   end
 
-  @tag :integration
-  test "POST /connectors integration" do
-    import IntegrationHelpers
-
+  test "POST /connectors with missing config" do
     config = %{
-      "connector.class" => "FileStreamSource",
-      "file" => "/kafka/LICENSE",
-      "topic" => "license-stream"
+      "file" => "some-file.txt",
+      "topic" => "some-topic"
     }
 
-    response = Connectors.create(connect_client(), "license-stream", config)
-
-    assert is_map(response)
-    assert Connectors.list(connect_client()) == ["license-stream"]
-    assert Connectors.delete(connect_client(), "license-stream") == :ok
-  end
-
-  test "POST /connectors with missing config" do
-    config = %{"file" => "some-file.txt", "topic" => "some-topic"}
     response = Connectors.create(client(), "something-new", config)
 
     assert {:error, body} = response
@@ -164,84 +75,99 @@ defmodule Kconnectex.ConnectorsTest do
     assert String.ends_with?(body["message"], "contains no connector type")
   end
 
-  test "GET /connectors/:connector" do
-    response = Connectors.info(client(), "debezium")
-
-    assert response["name"] == "debezium"
-    assert Map.has_key?(response, "config")
-    assert Map.has_key?(response, "tasks")
-  end
-
-  test "GET /connectors/:connector with an unknown connector" do
+  test "GET /connectors/:connector for an unknown connector" do
     assert Connectors.info(client(), "unknown") == {:error, :not_found}
-  end
-
-  test "GET /connectors/:connector/config" do
-    config = Connectors.config(client(), "debezium")
-
-    assert config["connector.class"] == "io.debezium.DebeziumConnector"
-  end
-
-  test "PUT connectors/:connector/config" do
-    response =
-      Connectors.update(
-        client(),
-        "debezium",
-        %{
-          "connector.class" => "io.debezium.DebeziumConnector",
-          "tasks.max" => "1",
-          "rotate.interval.ms" => "10000"
-        }
-      )
-
-    assert response["name"] == "debezium"
-    assert Map.has_key?(response, "config")
-    assert Map.has_key?(response, "tasks")
-  end
-
-  test "GET /connectors/:connector/status" do
-    status = Connectors.status(client(), "debezium")
-
-    assert status["name"] == "debezium"
-    assert Map.has_key?(status, "connector")
-    assert Map.has_key?(status["connector"], "state")
-    assert Map.has_key?(status, "tasks")
-    assert Map.has_key?(status["tasks"] |> List.first(), "state")
-  end
-
-  test "POST /connectors/:connector/restart" do
-    assert :ok == Connectors.restart(client(), "debezium")
   end
 
   test "POST /connectors/:connector/restart when rebalancing" do
     assert {:error, :rebalancing} == Connectors.restart(client("409"), "debezium")
   end
 
-  test "PUT /connectors/:connector/pause" do
-    assert :ok == Connectors.pause(client(), "debezium")
-  end
-
   test "PUT /connectors/:connector/pause when rebalancing" do
     assert {:error, :rebalancing} == Connectors.pause(client("409"), "debezium")
-  end
-
-  test "PUT /connectors/:connector/resume" do
-    assert :ok == Connectors.resume(client(), "debezium")
   end
 
   test "PUT /connectors/:connector/resume when rebalancing" do
     assert {:error, :rebalancing} == Connectors.resume(client("409"), "debezium")
   end
 
-  test "DELETE /connectors/:connector" do
-    assert :ok == Connectors.delete(client(), "debezium")
-  end
-
   test "DELETE /connectors/:connector when rebalancing" do
     assert {:error, :rebalancing} == Connectors.delete(client("409"), "debezium")
   end
 
+  @tag :integration
+  test "create and update a connector" do
+    import IntegrationHelpers
+
+    delete_existing_connectors(connect_client(), ["license-stream"])
+
+    bad_config = %{
+      "file" => "/kafka/LICENSE",
+      "topic" => "license-stream",
+      "name" => "license-stream"
+    }
+
+    bad_response = Connectors.create(connect_client(), "license-stream", bad_config)
+    assert {:error, body} = bad_response
+    assert body["error_code"] == 400
+    assert String.ends_with?(body["message"], "contains no connector type")
+
+    good_config = Map.put(bad_config, "connector.class", "FileStreamSource")
+    response = Connectors.create(connect_client(), "license-stream", good_config)
+    assert is_map(response)
+    assert response["name"] == "license-stream"
+    assert response["config"] == good_config
+    assert Map.has_key?(response, "tasks")
+
+    assert "license-stream" in Connectors.list(connect_client())
+
+    info = Connectors.info(connect_client(), "license-stream")
+    assert is_map(info)
+    assert info["name"] == "license-stream"
+    assert Map.has_key?(info, "config")
+    assert Map.has_key?(info, "tasks")
+
+    new_config = Map.put(good_config, "file", "/kafka/NOTICE")
+    response = Connectors.update(connect_client(), "license-stream", new_config)
+    assert Map.has_key?(response, "config")
+    assert Map.has_key?(response, "tasks")
+
+    config = Connectors.config(connect_client(), "license-stream")
+    assert config == new_config
+
+    status = Connectors.status(connect_client(), "license-stream")
+    assert status["name"] == "license-stream"
+    assert Map.has_key?(status, "connector")
+    assert Map.has_key?(status["connector"], "state")
+    assert Map.has_key?(status, "tasks")
+    assert Map.has_key?(status["tasks"] |> hd, "state")
+
+    assert :ok == Connectors.delete(connect_client(), "license-stream")
+    assert "license-stream" not in Connectors.list(connect_client())
+  end
+
+  test "POST /connectors/:connector/restart" do
+    assert :ok == Connectors.restart(client(), "debezium")
+  end
+
+  test "PUT /connectors/:connector/pause" do
+    assert :ok == Connectors.pause(client(), "debezium")
+  end
+
+  test "PUT /connectors/:connector/resume" do
+    assert :ok == Connectors.resume(client(), "debezium")
+  end
+
   defp client(base_url \\ "localhost") do
     Kconnectex.client(base_url, FakeAdapter)
+  end
+
+  defp delete_existing_connectors(client, connectors) do
+    to_delete = MapSet.new(connectors)
+
+    client
+    |> Connectors.list()
+    |> Enum.filter(&MapSet.member?(to_delete, &1))
+    |> Enum.map(&Connectors.delete(client, &1))
   end
 end
