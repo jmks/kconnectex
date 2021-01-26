@@ -30,6 +30,12 @@ defmodule Kconnectex.UtilTest do
       assert handle_response({:ok, %{status: 400, body: body}}) == {:error, body}
     end
 
+    test "returns error with body for server errors" do
+      body = %{"error" => "something"}
+
+      assert handle_response({:ok, %{status: 500, body: body}}) == {:error, body}
+    end
+
     test "returns error tuples" do
       assert handle_response({:error, :oops}) == {:error, :oops}
     end
