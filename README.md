@@ -14,17 +14,15 @@ Currently under development.
 * get
 * reset
 
-### Connector Plugins
-* get
-* validate config
-
 ### General
 * Move integration tests to a file
 * URL sanitize URL params
 * Add more integration tests (with FileStreamSource)
 * Better API for Clients?
+* Validating a config where the connector name does not match config => 500 from Connect (bug?)
 
 Would be nice to not have to pass "connector" to every function in Connectors?
+
 Wrap all successful in :ok tuples? Is `is_map(result)` annoying yet?
 
 ## Development
