@@ -55,7 +55,7 @@ defmodule Kconnectex.ConnectorsTest do
       "topic" => "some-topic"
     }
 
-    response = Connectors.create(client(), "something-new", config)
+    {:ok, response} = Connectors.create(client(), "something-new", config)
 
     assert response["name"] == "something-new"
     assert response["config"] == config
@@ -76,7 +76,7 @@ defmodule Kconnectex.ConnectorsTest do
   end
 
   test "GET /connectors/:connector for an unknown connector" do
-    assert Connectors.info(client(), "unknown") == {:error, :not_found}
+    assert {:error, :not_found} == Connectors.info(client(), "unknown")
   end
 
   test "POST /connectors/:connector/restart when rebalancing" do
@@ -107,35 +107,34 @@ defmodule Kconnectex.ConnectorsTest do
       "name" => "license-stream"
     }
 
-    bad_response = Connectors.create(connect_client(), "license-stream", bad_config)
-    assert {:error, body} = bad_response
+    {:error, body} = Connectors.create(connect_client(), "license-stream", bad_config)
     assert body["error_code"] == 400
     assert String.ends_with?(body["message"], "contains no connector type")
 
     good_config = Map.put(bad_config, "connector.class", "FileStreamSource")
-    response = Connectors.create(connect_client(), "license-stream", good_config)
+    {:ok, response} = Connectors.create(connect_client(), "license-stream", good_config)
     assert is_map(response)
     assert response["name"] == "license-stream"
     assert response["config"] == good_config
     assert Map.has_key?(response, "tasks")
 
-    assert "license-stream" in Connectors.list(connect_client())
+    assert is_connector?(connect_client(), "license-stream")
 
-    info = Connectors.info(connect_client(), "license-stream")
+    {:ok, info} = Connectors.info(connect_client(), "license-stream")
     assert is_map(info)
     assert info["name"] == "license-stream"
     assert Map.has_key?(info, "config")
     assert Map.has_key?(info, "tasks")
 
     new_config = Map.put(good_config, "file", "/kafka/NOTICE")
-    response = Connectors.update(connect_client(), "license-stream", new_config)
+    {:ok, response} = Connectors.update(connect_client(), "license-stream", new_config)
     assert Map.has_key?(response, "config")
     assert Map.has_key?(response, "tasks")
 
-    config = Connectors.config(connect_client(), "license-stream")
+    {:ok, config} = Connectors.config(connect_client(), "license-stream")
     assert config == new_config
 
-    status = Connectors.status(connect_client(), "license-stream")
+    {:ok, status} = Connectors.status(connect_client(), "license-stream")
     assert status["name"] == "license-stream"
     assert Map.has_key?(status, "connector")
     assert Map.has_key?(status["connector"], "state")
@@ -143,7 +142,7 @@ defmodule Kconnectex.ConnectorsTest do
     assert Map.has_key?(status["tasks"] |> hd, "state")
 
     assert :ok == Connectors.delete(connect_client(), "license-stream")
-    assert "license-stream" not in Connectors.list(connect_client())
+    refute is_connector?(connect_client(), "license-stream")
   end
 
   test "POST /connectors/:connector/restart" do
@@ -165,9 +164,19 @@ defmodule Kconnectex.ConnectorsTest do
   defp delete_existing_connectors(client, connectors) do
     to_delete = MapSet.new(connectors)
 
-    client
-    |> Connectors.list()
+    {:ok, connectors} = Connectors.list(client)
+
+    connectors
     |> Enum.filter(&MapSet.member?(to_delete, &1))
     |> Enum.map(&Connectors.delete(client, &1))
+  end
+
+  defp is_connector?(client, name) do
+    case Connectors.list(client) do
+      {:ok, connectors} ->
+        Enum.member?(connectors, name)
+      _ ->
+        false
+    end
   end
 end
