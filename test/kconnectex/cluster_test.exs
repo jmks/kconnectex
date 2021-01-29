@@ -15,7 +15,9 @@ defmodule Kconnectex.ClusterTest do
   test "GET /" do
     import IntegrationHelpers
 
-    cluster_info = Kconnectex.Cluster.info(connect_client())
+    assert Kconnectex.Cluster.info(Kconnectex.client("http://0.0.0.0:9999")) == {:error, :econnrefused}
+
+    {:ok, cluster_info} = Kconnectex.Cluster.info(connect_client())
 
     assert cluster_info["version"] == "2.6.0"
     assert Map.has_key?(cluster_info, "commit")
