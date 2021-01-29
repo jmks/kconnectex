@@ -40,10 +40,10 @@ defmodule Kconnectex.TasksTest do
   end
 
   test "GET /connectors/:connector/tasks" do
-    response = Tasks.list(client(), "filestream")
+    {:ok, tasks} = Tasks.list(client(), "filestream")
 
-    assert is_list(response)
-    task = hd(response)
+    assert is_list(tasks)
+    task = hd(tasks)
     assert Map.has_key?(task, "id")
     assert Map.has_key?(task, "config")
     assert task["id"]["connector"] == "filestream"
@@ -51,11 +51,11 @@ defmodule Kconnectex.TasksTest do
   end
 
   test "GET /connectors/:connector/tasks/:task_id/status" do
-    response = Tasks.status(client(), "filestream", 0)
+    {:ok, status} = Tasks.status(client(), "filestream", 0)
 
-    assert response["id"] == 0
-    assert response["state"] == "RUNNING"
-    assert Map.has_key?(response, "worker_id")
+    assert status["id"] == 0
+    assert status["state"] == "RUNNING"
+    assert Map.has_key?(status, "worker_id")
   end
 
   test "GET /connectors/:connector/tasks/:task_id/status with unknown task" do
