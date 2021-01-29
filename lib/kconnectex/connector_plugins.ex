@@ -13,7 +13,7 @@ defmodule Kconnectex.ConnectorPlugins do
 
   defp connector_class(%{"connector.class" => class}) do
     if String.contains?(class, ".") do
-      class |> String.split(".", trim: true) |> List.last
+      class |> String.split(".", trim: true) |> List.last()
     else
       class
     end

@@ -23,7 +23,13 @@ defmodule Kconnectex.ConnectorPluginsTest do
        }}
     end
 
-    def call(%{method: :put, url: "localhost/connector-plugins/FileStreamSinkConnector/config/validate"} = req, _) do
+    def call(
+          %{
+            method: :put,
+            url: "localhost/connector-plugins/FileStreamSinkConnector/config/validate"
+          } = req,
+          _
+        ) do
       request_body = Jason.decode!(req.body)
       errors = if Map.has_key?(request_body, "name"), do: 0, else: 1
 
@@ -43,9 +49,10 @@ defmodule Kconnectex.ConnectorPluginsTest do
            status: 500,
            body: %{
              "error_code" => 500,
-             "message" => "org.apache.kafka.common.config.ConfigException: Must configure one of topics or topics.regex"
+             "message" =>
+               "org.apache.kafka.common.config.ConfigException: Must configure one of topics or topics.regex"
            }
-        }}
+         }}
       end
     end
   end
@@ -95,12 +102,16 @@ defmodule Kconnectex.ConnectorPluginsTest do
     invalid = Kconnectex.ConnectorPlugins.validate_config(connect_client(), invalid_config)
     assert invalid["name"] == "org.apache.kafka.connect.file.FileStreamSinkConnector"
     assert invalid["error_count"] == 1
-    assert first_config_error(invalid["configs"]) == "Missing required configuration \"name\" which has no default value."
+
+    assert first_config_error(invalid["configs"]) ==
+             "Missing required configuration \"name\" which has no default value."
 
     error_config = Map.delete(@file_stream_config, "topics")
     {:error, error} = Kconnectex.ConnectorPlugins.validate_config(connect_client(), error_config)
     assert error["error_code"] == 500
-    assert error["message"] == "org.apache.kafka.common.config.ConfigException: Must configure one of topics or topics.regex"
+
+    assert error["message"] ==
+             "org.apache.kafka.common.config.ConfigException: Must configure one of topics or topics.regex"
   end
 
   defp client(base_url \\ "localhost") do
