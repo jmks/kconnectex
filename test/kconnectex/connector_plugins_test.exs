@@ -58,7 +58,7 @@ defmodule Kconnectex.ConnectorPluginsTest do
   end
 
   test "GET /connector-plugins" do
-    [plugin | _] = Kconnectex.ConnectorPlugins.list(client())
+    {:ok, [plugin | _]} = Kconnectex.ConnectorPlugins.list(client())
 
     assert Map.has_key?(plugin, "name")
     assert Map.has_key?(plugin, "type")
@@ -66,7 +66,7 @@ defmodule Kconnectex.ConnectorPluginsTest do
   end
 
   test "PUT /connector-plugins/:class/config/validate with good config" do
-    validate = Kconnectex.ConnectorPlugins.validate_config(client(), @file_stream_config)
+    {:ok, validate} = Kconnectex.ConnectorPlugins.validate_config(client(), @file_stream_config)
 
     assert Map.has_key?(validate, "name")
     assert Map.has_key?(validate, "error_count")
@@ -76,7 +76,7 @@ defmodule Kconnectex.ConnectorPluginsTest do
   test "PUT /connector-plugins/:class/config/validate with invalid configuration" do
     bad_config = Map.delete(@file_stream_config, "name")
 
-    validate = Kconnectex.ConnectorPlugins.validate_config(client(), bad_config)
+    {:ok, validate} = Kconnectex.ConnectorPlugins.validate_config(client(), bad_config)
 
     assert validate["error_count"] == 1
   end
@@ -94,12 +94,12 @@ defmodule Kconnectex.ConnectorPluginsTest do
   test "validating config" do
     import IntegrationHelpers
 
-    valid = Kconnectex.ConnectorPlugins.validate_config(connect_client(), @file_stream_config)
+    {:ok, valid} = Kconnectex.ConnectorPlugins.validate_config(connect_client(), @file_stream_config)
     assert valid["name"] == "org.apache.kafka.connect.file.FileStreamSinkConnector"
     assert valid["error_count"] == 0
 
     invalid_config = Map.delete(@file_stream_config, "name")
-    invalid = Kconnectex.ConnectorPlugins.validate_config(connect_client(), invalid_config)
+    {:ok, invalid} = Kconnectex.ConnectorPlugins.validate_config(connect_client(), invalid_config)
     assert invalid["name"] == "org.apache.kafka.connect.file.FileStreamSinkConnector"
     assert invalid["error_count"] == 1
 
