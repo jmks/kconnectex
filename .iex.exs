@@ -10,9 +10,9 @@ defmodule Helpers do
   end
 
   def clear_connectors(client) do
-    client
-    |> Kconnectex.Connectors.list
-    |> Enum.map(&Kconnectex.Connectors.delete(client, &1))
+    {:ok, connectors} = Kconnectex.Connectors.list(client)
+
+    Enum.map(connectors, &Kconnectex.Connectors.delete(client, &1))
   end
 end
 
