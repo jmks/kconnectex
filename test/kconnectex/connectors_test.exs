@@ -175,6 +175,7 @@ defmodule Kconnectex.ConnectorsTest do
     case Connectors.list(client) do
       {:ok, connectors} ->
         Enum.member?(connectors, name)
+
       _ ->
         false
     end

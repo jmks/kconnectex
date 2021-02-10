@@ -94,7 +94,9 @@ defmodule Kconnectex.ConnectorPluginsTest do
   test "validating config" do
     import IntegrationHelpers
 
-    {:ok, valid} = Kconnectex.ConnectorPlugins.validate_config(connect_client(), @file_stream_config)
+    {:ok, valid} =
+      Kconnectex.ConnectorPlugins.validate_config(connect_client(), @file_stream_config)
+
     assert valid["name"] == "org.apache.kafka.connect.file.FileStreamSinkConnector"
     assert valid["error_count"] == 0
 

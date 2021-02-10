@@ -24,12 +24,13 @@ defmodule Kconnectex.Util do
 
   defp do_validate([], []), do: :ok
 
-  defp do_validate([], errors), do: {:error, errors |> List.flatten |> Enum.reverse}
+  defp do_validate([], errors), do: {:error, errors |> List.flatten() |> Enum.reverse()}
 
   defp do_validate([{field, checks} | rest], errors) do
     case failed_conditions(field, checks) do
       [] ->
         do_validate(rest, errors)
+
       errs ->
         do_validate(rest, [errs | errors])
     end
