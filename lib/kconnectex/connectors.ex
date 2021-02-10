@@ -6,7 +6,13 @@ defmodule Kconnectex.Connectors do
   end
 
   def create(client, name, config) do
-    handle_response(Tesla.post(client, "/connectors", %{name: name, config: config}))
+    case validate(name: [present: name]) do
+      :ok ->
+        handle_response(Tesla.post(client, "/connectors", %{name: name, config: config}))
+
+      {:error, [name: :is_blank]} ->
+        {:error, "connector name can not be blank"}
+    end
   end
 
   def info(client, connector) do
