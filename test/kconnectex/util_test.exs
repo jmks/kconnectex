@@ -40,4 +40,16 @@ defmodule Kconnectex.UtilTest do
       assert handle_response({:error, :oops}) == {:error, :oops}
     end
   end
+
+  describe "validate" do
+    test "validates that string is present" do
+      assert :ok == validate([name: [present: "some_name"]])
+      assert {:error, [name: :is_blank]} == validate([name: [present: ""]])
+    end
+
+    test "validates string must match" do
+      assert :ok == validate([editor: [{:match, "elixir", "elixir"}]])
+      assert {:error, [editor: :do_not_match]} == validate([editor: [{:match, "elixir", "ruby"}]])
+    end
+  end
 end
