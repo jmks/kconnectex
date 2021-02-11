@@ -24,7 +24,7 @@ defmodule Kconnectex.RequestTest do
     end
 
     test "returns error when value is not in collection" do
-      req = Request.new(client()) |> Request.validate({:in, 1, [2,3,4]}, "1 is not 2, 3, or 4")
+      req = Request.new(client()) |> Request.validate({:in, 1, [2, 3, 4]}, "1 is not 2, 3, or 4")
 
       assert {:error, ["1 is not 2, 3, or 4"]} == Request.execute(req)
     end
