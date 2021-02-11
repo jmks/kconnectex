@@ -75,24 +75,16 @@ defmodule Kconnectex.ConnectorsTest do
     assert String.ends_with?(body["message"], "contains no connector type")
   end
 
+  test "GET /connectors/:connector with blank connector" do
+    assert {:error, ["connector can not be blank"]} == Connectors.info(client(), "")
+  end
+
   test "GET /connectors/:connector for an unknown connector" do
     assert {:error, :not_found} == Connectors.info(client(), "unknown")
   end
 
   test "POST /connectors/:connector/restart when rebalancing" do
     assert {:error, :rebalancing} == Connectors.restart(client("409"), "debezium")
-  end
-
-  test "PUT /connectors/:connector/pause when rebalancing" do
-    assert {:error, :rebalancing} == Connectors.pause(client("409"), "debezium")
-  end
-
-  test "PUT /connectors/:connector/resume when rebalancing" do
-    assert {:error, :rebalancing} == Connectors.resume(client("409"), "debezium")
-  end
-
-  test "DELETE /connectors/:connector when rebalancing" do
-    assert {:error, :rebalancing} == Connectors.delete(client("409"), "debezium")
   end
 
   @tag :integration
@@ -159,16 +151,6 @@ defmodule Kconnectex.ConnectorsTest do
 
   defp client(base_url \\ "localhost") do
     Kconnectex.client(base_url, FakeAdapter)
-  end
-
-  defp delete_existing_connectors(client, connectors) do
-    to_delete = MapSet.new(connectors)
-
-    {:ok, connectors} = Connectors.list(client)
-
-    connectors
-    |> Enum.filter(&MapSet.member?(to_delete, &1))
-    |> Enum.map(&Connectors.delete(client, &1))
   end
 
   defp is_connector?(client, name) do

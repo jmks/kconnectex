@@ -17,7 +17,8 @@ defmodule Kconnectex.RequestTest do
     end
 
     test "returns error when value's do not match" do
-      req = Request.new(client()) |> Request.validate({:match, "elixir", "ruby"}, "must be elixir")
+      req =
+        Request.new(client()) |> Request.validate({:match, "elixir", "ruby"}, "must be elixir")
 
       assert {:error, ["must be elixir"]} == Request.execute(req)
     end
@@ -51,6 +52,12 @@ defmodule Kconnectex.RequestTest do
 
       assert req.mfa == {Tesla, :put, ["http://example.com", "body"]}
     end
+
+    test "delete" do
+      req = Request.new(client()) |> Request.delete("http://example.com")
+
+      assert req.mfa == {Tesla, :delete, ["http://example.com"]}
+    end
   end
 
   @tag :integration
@@ -64,12 +71,14 @@ defmodule Kconnectex.RequestTest do
     assert {:ok, _} = Request.get(base_req, "/") |> Request.execute()
 
     path = "/connector-plugins/FileStreamSinkConnector/config/validate"
+
     valid_config = %{
       "connector.class" => "org.apache.kafka.connect.file.FileStreamSinkConnector",
       "file" => "/kafka/LICENSE",
       "topics" => "license-stream",
       "name" => "license-stream"
     }
+
     assert {:ok, _} = Request.put(base_req, path, valid_config) |> Request.execute()
 
     body = %{"config" => valid_config, "name" => valid_config["name"]}

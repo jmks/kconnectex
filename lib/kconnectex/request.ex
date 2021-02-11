@@ -20,6 +20,10 @@ defmodule Kconnectex.Request do
     %{req | mfa: {Tesla, :put, [path, body]}}
   end
 
+  def delete(req, path) do
+    %{req | mfa: {Tesla, :delete, [path]}}
+  end
+
   def validate(req, condition, message) do
     %{req | conditions: [{condition, message} | req.conditions]}
   end

@@ -1,49 +1,70 @@
 defmodule Kconnectex.Connectors do
-  import Kconnectex.Util
+  alias Kconnectex.Request
 
   def list(client) do
-    handle_response(Tesla.get(client, "/connectors"))
+    client
+    |> Request.new()
+    |> Request.get("/connectors")
+    |> Request.execute()
   end
 
-  def create(client, name, config) do
-    case validate(name: [present: name]) do
-      :ok ->
-        handle_response(Tesla.post(client, "/connectors", %{name: name, config: config}))
-
-      {:error, [name: :is_blank]} ->
-        {:error, "connector name can not be blank"}
-    end
+  def create(client, connector, config) do
+    request(client, connector)
+    |> Request.post("/connectors", %{name: connector, config: config})
+    |> Request.execute()
   end
 
   def info(client, connector) do
-    handle_response(Tesla.get(client, "/connectors/#{connector}"))
+    request(client, connector)
+    |> Request.get("/connectors/#{connector}")
+    |> Request.execute()
   end
 
   def config(client, connector) do
-    handle_response(Tesla.get(client, "/connectors/#{connector}/config"))
+    request(client, connector)
+    |> Request.get("/connectors/#{connector}/config")
+    |> Request.execute()
   end
 
   def update(client, connector, config) do
-    handle_response(Tesla.put(client, "/connectors/#{connector}/config", config))
+    request(client, connector)
+    |> Request.put("/connectors/#{connector}/config", config)
+    |> Request.execute()
   end
 
   def status(client, connector) do
-    handle_response(Tesla.get(client, "/connectors/#{connector}/status"))
+    request(client, connector)
+    |> Request.get("/connectors/#{connector}/status")
+    |> Request.execute()
   end
 
   def restart(client, connector) do
-    handle_response(Tesla.post(client, "/connectors/#{connector}/restart", ""))
+    request(client, connector)
+    |> Request.post("/connectors/#{connector}/restart", "")
+    |> Request.execute()
   end
 
   def pause(client, connector) do
-    handle_response(Tesla.put(client, "/connectors/#{connector}/pause", ""))
+    request(client, connector)
+    |> Request.put("/connectors/#{connector}/pause", "")
+    |> Request.execute()
   end
 
   def resume(client, connector) do
-    handle_response(Tesla.put(client, "/connectors/#{connector}/resume", ""))
+    request(client, connector)
+    |> Request.put("/connectors/#{connector}/resume", "")
+    |> Request.execute()
   end
 
   def delete(client, connector) do
-    handle_response(Tesla.delete(client, "/connectors/#{connector}"))
+    request(client, connector)
+    |> Request.delete("/connectors/#{connector}")
+    |> Request.execute()
+  end
+
+  def request(client, connector) do
+    client
+    |> Request.new()
+    |> Request.validate({:present, connector}, "connector can not be blank")
   end
 end
