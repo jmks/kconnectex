@@ -1,6 +1,8 @@
 defmodule Kconnectex.ClusterTest do
   use ExUnit.Case, async: true
 
+  alias Kconnectex.Cluster
+
   defmodule FakeAdapter do
     def call(%{url: "badconn" <> _}, _) do
       {:error, :econnrefused}
@@ -8,17 +10,17 @@ defmodule Kconnectex.ClusterTest do
   end
 
   test "GET / with no connection" do
-    assert Kconnectex.Cluster.info(client("badconn")) == {:error, :econnrefused}
+    assert Cluster.info(client("badconn")) == {:error, :econnrefused}
   end
 
   @tag :integration
   test "GET /" do
     import IntegrationHelpers
 
-    assert Kconnectex.Cluster.info(Kconnectex.client("http://0.0.0.0:9999")) ==
+    assert Cluster.info(Kconnectex.client("http://0.0.0.0:9999")) ==
              {:error, :econnrefused}
 
-    {:ok, cluster_info} = Kconnectex.Cluster.info(connect_client())
+    {:ok, cluster_info} = Cluster.info(connect_client())
 
     assert cluster_info["version"] == "2.6.0"
     assert Map.has_key?(cluster_info, "commit")

@@ -1,7 +1,9 @@
 defmodule Kconnectex.Cluster do
-  import Kconnectex.Util
+  alias Kconnectex.Request
 
   def info(client) do
-    handle_response(Tesla.get(client, "/"))
+    Request.new(client)
+    |> Request.get("/")
+    |> Request.execute()
   end
 end
