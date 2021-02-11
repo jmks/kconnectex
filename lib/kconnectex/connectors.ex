@@ -62,7 +62,7 @@ defmodule Kconnectex.Connectors do
     |> Request.execute()
   end
 
-  def request(client, connector) do
+  defp request(client, connector) do
     client
     |> Request.new()
     |> Request.validate({:present, connector}, "connector can not be blank")
