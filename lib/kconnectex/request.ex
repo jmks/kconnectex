@@ -52,6 +52,7 @@ defmodule Kconnectex.Request do
   end
 
   defp check({:present, nil}), do: false
+
   defp check({:present, str}) do
     str |> String.trim() |> String.length() > 0
   end

@@ -65,6 +65,11 @@ defmodule Kconnectex.ConnectorPluginsTest do
     assert Map.has_key?(plugin, "version")
   end
 
+  test "connector.class is required" do
+    {:error, ["config must have key: connector.class"]} =
+      Kconnectex.ConnectorPlugins.validate_config(client(), %{})
+  end
+
   test "PUT /connector-plugins/:class/config/validate with good config" do
     {:ok, validate} = Kconnectex.ConnectorPlugins.validate_config(client(), @file_stream_config)
 

@@ -1,14 +1,19 @@
 defmodule Kconnectex.ConnectorPlugins do
-  import Kconnectex.Util
+  alias Kconnectex.Request
 
   def list(client) do
-    handle_response(Tesla.get(client, "/connector-plugins"))
+    Request.new(client)
+    |> Request.get("/connector-plugins")
+    |> Request.execute()
   end
 
   def validate_config(client, config) when is_map(config) do
     class = connector_class(config)
 
-    handle_response(Tesla.put(client, "/connector-plugins/#{class}/config/validate", config))
+    Request.new(client)
+    |> Request.validate({:present, class}, "config must have key: connector.class")
+    |> Request.put("/connector-plugins/#{class}/config/validate", config)
+    |> Request.execute()
   end
 
   defp connector_class(%{"connector.class" => class}) do
@@ -18,4 +23,6 @@ defmodule Kconnectex.ConnectorPlugins do
       class
     end
   end
+
+  defp connector_class(_), do: nil
 end
