@@ -58,6 +58,8 @@ defmodule Kconnectex.Request do
   defp check({:match, value, value}), do: true
   defp check({:match, _, _}), do: false
 
+  defp check({:in, value, collection}), do: Enum.member?(collection, value)
+
   defp make_request(%{client: client, mfa: {m, f, a}}) do
     apply(m, f, [client | a])
   end
