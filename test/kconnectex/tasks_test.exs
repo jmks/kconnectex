@@ -39,6 +39,12 @@ defmodule Kconnectex.TasksTest do
     end
   end
 
+  test "connector is required" do
+    assert {:error, ["connector can not be blank"]} == Tasks.list(client(), "")
+    assert {:error, ["connector can not be blank"]} == Tasks.status(client(), "", 0)
+    assert {:error, ["connector can not be blank"]} == Tasks.restart(client(), "", 0)
+  end
+
   test "GET /connectors/:connector/tasks" do
     {:ok, tasks} = Tasks.list(client(), "filestream")
 
