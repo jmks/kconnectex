@@ -10,10 +10,16 @@ defmodule Kconnectex.RequestTest do
   end
 
   describe "validate" do
-    test "returns error when value is blank" do
+    test "returns error when string is empty" do
       req = Request.new(client()) |> Request.validate({:present, "   \r\n"}, "can't be blank")
 
       assert {:error, ["can't be blank"]} == Request.execute(req)
+    end
+
+    test "returns error when value is nil" do
+      req = Request.new(client()) |> Request.validate({:present, nil}, "can't be nil")
+
+      assert {:error, ["can't be nil"]} == Request.execute(req)
     end
 
     test "returns error when value's do not match" do

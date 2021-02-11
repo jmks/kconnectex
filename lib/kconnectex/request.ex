@@ -51,6 +51,7 @@ defmodule Kconnectex.Request do
     |> Enum.filter(&(&1 != :ok))
   end
 
+  defp check({:present, nil}), do: false
   defp check({:present, str}) do
     str |> String.trim() |> String.length() > 0
   end
