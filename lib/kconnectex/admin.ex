@@ -1,4 +1,11 @@
 defmodule Kconnectex.Admin do
+  @moduledoc """
+  Endpoints to check or change log levels.
+
+  https://docs.confluent.io/platform/current/connect/references/restapi.html#log-levels
+  https://docs.confluent.io/platform/current/connect/logging.html#connect-logging-using-api
+  """
+
   alias Kconnectex.Request
 
   # https://docs.confluent.io/platform/current/connect/logging.html#kconnect-long-logging

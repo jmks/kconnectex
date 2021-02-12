@@ -1,4 +1,10 @@
 defmodule Kconnectex.ConnectorPlugins do
+  @moduledoc """
+  Endpoint to list loaded connector plugins and validate configuration for a connector plugin.
+
+  https://docs.confluent.io/platform/current/connect/references/restapi.html#connector-plugins
+  """
+
   alias Kconnectex.Request
 
   def list(client) do

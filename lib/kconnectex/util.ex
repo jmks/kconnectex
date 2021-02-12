@@ -1,4 +1,6 @@
 defmodule Kconnectex.Util do
+  @moduledoc false
+
   def handle_response(response) do
     case response do
       {:ok, %{status: status, body: body}} when status in 200..299 ->

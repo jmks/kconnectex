@@ -1,4 +1,10 @@
 defmodule Kconnectex.Tasks do
+  @moduledoc """
+  Endpoint to manage a connector's tasks.
+
+  https://docs.confluent.io/platform/current/connect/references/restapi.html#tasks
+  """
+
   alias Kconnectex.Request
 
   def list(client, connector) do

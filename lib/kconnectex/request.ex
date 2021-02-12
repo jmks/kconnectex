@@ -1,4 +1,6 @@
 defmodule Kconnectex.Request do
+  @moduledoc false
+
   @enforce_keys [:client]
   defstruct [:client, :mfa, conditions: []]
 
@@ -58,6 +60,7 @@ defmodule Kconnectex.Request do
   end
 
   defp check({:match, value, value}), do: true
+
   defp check({:match, _, _}), do: false
 
   defp check({:in, value, collection}), do: Enum.member?(collection, value)

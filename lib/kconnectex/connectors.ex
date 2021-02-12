@@ -1,4 +1,10 @@
 defmodule Kconnectex.Connectors do
+  @moduledoc """
+  Endpoint to manage connectors.
+
+  https://docs.confluent.io/platform/current/connect/references/restapi.html#connectors
+  """
+
   alias Kconnectex.Request
 
   def list(client) do
