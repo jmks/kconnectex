@@ -15,9 +15,8 @@ Currently under development.
 * reset
 
 ### General
-* URL sanitize URL params
+* Having a "client" and request seems redundant??
 * Add more integration tests (with FileStreamSource)
-* Better API for Clients?
 * Validating a config where the connector name does not match config => 500 from Connect (bug?)
 
 ## Development

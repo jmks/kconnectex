@@ -48,9 +48,9 @@ defmodule Kconnectex.RequestTest do
 
   describe "requests" do
     test "get" do
-      req = Request.new(client()) |> Request.get("http://google.com")
+      req = Request.new(client()) |> Request.get("http://example.com")
 
-      assert req.mfa == {Tesla, :get, ["http://google.com"]}
+      assert req.mfa == {Tesla, :get, ["http://example.com"]}
     end
 
     test "post" do
@@ -69,6 +69,13 @@ defmodule Kconnectex.RequestTest do
       req = Request.new(client()) |> Request.delete("http://example.com")
 
       assert req.mfa == {Tesla, :delete, ["http://example.com"]}
+    end
+
+    test "URI encodes the path" do
+      path_part = "with space"
+      req = Request.new(client()) |> Request.get("http://example.com/#{path_part}")
+
+      assert req.mfa == {Tesla, :get, ["http://example.com/with%20space"]}
     end
   end
 

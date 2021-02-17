@@ -11,19 +11,19 @@ defmodule Kconnectex.Request do
   end
 
   def get(req, path) do
-    %{req | mfa: {Tesla, :get, [path]}}
+    %{req | mfa: {Tesla, :get, [URI.encode(path)]}}
   end
 
   def post(req, path, body) do
-    %{req | mfa: {Tesla, :post, [path, body]}}
+    %{req | mfa: {Tesla, :post, [URI.encode(path), body]}}
   end
 
   def put(req, path, body) do
-    %{req | mfa: {Tesla, :put, [path, body]}}
+    %{req | mfa: {Tesla, :put, [URI.encode(path), body]}}
   end
 
   def delete(req, path) do
-    %{req | mfa: {Tesla, :delete, [path]}}
+    %{req | mfa: {Tesla, :delete, [URI.encode(path)]}}
   end
 
   def validate(req, condition, message) do
