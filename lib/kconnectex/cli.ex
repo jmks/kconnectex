@@ -65,11 +65,34 @@ defmodule Kconnectex.CLI do
     end
   end
 
+  defp run(%{command: ["tasks", connector], url: url}) do
+    url
+    |> Kconnectex.client()
+    |> Kconnectex.Tasks.list(connector)
+    |> display()
+  end
+
+  defp run(%{command: ["tasks", "status", connector, task_id], url: url}) do
+    url
+    |> Kconnectex.client()
+    |> Kconnectex.Tasks.status(connector, task_id)
+    |> display()
+  end
+
+  defp run(%{command: ["tasks", "restart", connector, task_id], url: url}) do
+    url
+    |> Kconnectex.client()
+    |> Kconnectex.Tasks.restart(connector, task_id)
+    |> display()
+  end
+
   defp run(opts) do
     command = Enum.join(opts.command, " ")
 
     display_errors(["`#{command}` was not understood"])
   end
+
+  defp display(:ok), do: IO.puts("Success")
 
   defp display({:ok, result}) do
     result
