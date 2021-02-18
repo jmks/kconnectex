@@ -45,10 +45,30 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
+  defp run(%{command: ["plugins"], url: url}) do
+    url
+    |> Kconnectex.client()
+    |> Kconnectex.ConnectorPlugins.list()
+    |> display()
+  end
+
+  defp run(%{command: ["plugins", "validate"], url: url}) do
+    case read_stdin() do
+      {:ok, json} ->
+        url
+        |> Kconnectex.client()
+        |> Kconnectex.ConnectorPlugins.validate_config(json)
+        |> display()
+
+      {:error, err} ->
+        display_errors([Jason.DecodeError.message(err)])
+    end
+  end
+
   defp run(opts) do
     command = Enum.join(opts.command, " ")
 
-    display_errors(["command `#{command}` not found"])
+    display_errors(["`#{command}` was not understood"])
   end
 
   defp display({:ok, result}) do
@@ -77,6 +97,12 @@ defmodule Kconnectex.CLI do
     Enum.each(errors, &IO.puts/1)
     IO.puts("")
     IO.puts("Run `#{:escript.script_name()} help` for usage")
+  end
+
+  defp read_stdin do
+    IO.read(:stdio, :all)
+    |> String.trim()
+    |> Jason.decode()
   end
 
   defp usage do
