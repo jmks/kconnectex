@@ -7,7 +7,8 @@ defmodule Kconnectex.MixProject do
       version: "0.1.0",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      escript: escript()
     ]
   end
 
@@ -28,6 +29,12 @@ defmodule Kconnectex.MixProject do
       {:tesla, "~> 1.4.0"},
       {:hackney, "~> 1.16.0"},
       {:jason, ">= 1.0.0"}
+    ]
+  end
+
+  defp escript do
+    [
+      main_module: Kconnectex.CLI
     ]
   end
 end
