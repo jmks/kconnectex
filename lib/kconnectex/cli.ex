@@ -27,6 +27,27 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
+  defp run(%{command: ["loggers"], url: url}) do
+    url
+    |> Kconnectex.client()
+    |> Kconnectex.Admin.loggers()
+    |> display()
+  end
+
+  defp run(%{command: ["loggers", logger], url: url}) do
+    url
+    |> Kconnectex.client()
+    |> Kconnectex.Admin.logger_level(logger)
+    |> display()
+  end
+
+  defp run(%{command: ["loggers", logger, level], url: url}) do
+    url
+    |> Kconnectex.client()
+    |> Kconnectex.Admin.logger_level(logger, level)
+    |> display()
+  end
+
   defp display({:ok, result}) do
     result
     |> Jason.encode!(pretty: true)
@@ -38,7 +59,15 @@ defmodule Kconnectex.CLI do
     IO.puts(error_description(errors))
   end
 
-  defp error_description(:econnrefused), do: "Connection to server failed"
+  defp error_description(:econnrefused), do: "  Connection to server failed"
+
+  defp error_description(:not_found), do: "  Not found"
+
+  defp error_description(errors) when is_list(errors) do
+    errors
+    |> Enum.map(&"  #{&1}")
+    |> Enum.join("\n")
+  end
 
   defp usage do
     version = Application.spec(:kconnectex, :vsn)
