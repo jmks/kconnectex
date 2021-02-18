@@ -20,6 +20,26 @@ defmodule Kconnectex.CLI do
     usage()
   end
 
+  defp run(%{command: ["cluster", "info"], url: url}) do
+    url
+    |> Kconnectex.client()
+    |> Kconnectex.Cluster.info()
+    |> display()
+  end
+
+  defp display({:ok, result}) do
+    result
+    |> Jason.encode!(pretty: true)
+    |> IO.puts()
+  end
+
+  defp display({:error, errors}) do
+    IO.puts("Error with request:")
+    IO.puts(error_description(errors))
+  end
+
+  defp error_description(:econnrefused), do: "Connection to server failed"
+
   defp usage do
     version = Application.spec(:kconnectex, :vsn)
 
@@ -31,8 +51,8 @@ defmodule Kconnectex.CLI do
         URL to Kafka Connect Cluster
 
     Commands:
-      admin
       cluster
+      loggers
       plugins
       connectors
       tasks
