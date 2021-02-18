@@ -1,5 +1,24 @@
 defmodule Kconnectex.CLI do
-  def main(_), do: usage()
+  alias Kconnectex.CLI.Options
+
+  def main(args) do
+    opts = Options.parse(args)
+
+    case opts.errors do
+      [] ->
+        run(opts)
+
+      errors ->
+        IO.puts("Here are some errors that need to be resolved:")
+        Enum.each(errors, &IO.puts/1)
+        IO.puts("")
+        IO.puts("Run `#{:escript.script_name()} help` for usage")
+    end
+  end
+
+  defp run(%{command: ["help"]}) do
+    usage()
+  end
 
   defp usage do
     version = Application.spec(:kconnectex, :vsn)
@@ -17,6 +36,8 @@ defmodule Kconnectex.CLI do
       plugins
       connectors
       tasks
+
+      help (this!)
     """)
   end
 end

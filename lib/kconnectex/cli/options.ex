@@ -9,13 +9,20 @@ defmodule Kconnectex.CLI.Options do
     {parsed, command, invalid} = OptionParser.parse(args, strict: [url: :string])
 
     %__MODULE__{}
+    |> with_command(command)
     |> add_url(parsed)
     |> add_errors(invalid)
-    |> with_command(command)
   end
 
-  defp add_url(opts, [url: url]), do: %{opts | url: url}
-  defp add_url(opts, __________), do: %{opts | errors: ["--url is required" | opts.errors]}
+  defp add_url(opts, url: url), do: %{opts | url: url}
+
+  defp add_url(opts, _) do
+    if opts.command == ["help"] do
+      opts
+    else
+      %{opts | errors: ["--url is required" | opts.errors]}
+    end
+  end
 
   defp add_errors(opts, invalid) do
     messages =
@@ -29,6 +36,7 @@ defmodule Kconnectex.CLI.Options do
   defp with_command(opts, []) do
     %{opts | command: ["help"]}
   end
+
   defp with_command(opts, command) do
     %{opts | command: command}
   end
