@@ -9,10 +9,7 @@ defmodule Kconnectex.CLI do
         run(opts)
 
       errors ->
-        IO.puts("Here are some errors that need to be resolved:")
-        Enum.each(errors, &IO.puts/1)
-        IO.puts("")
-        IO.puts("Run `#{:escript.script_name()} help` for usage")
+        display_errors(errors)
     end
   end
 
@@ -48,6 +45,12 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
+  defp run(opts) do
+    command = Enum.join(opts.command, " ")
+
+    display_errors(["command `#{command}` not found"])
+  end
+
   defp display({:ok, result}) do
     result
     |> Jason.encode!(pretty: true)
@@ -67,6 +70,13 @@ defmodule Kconnectex.CLI do
     errors
     |> Enum.map(&"  #{&1}")
     |> Enum.join("\n")
+  end
+
+  defp display_errors(errors) do
+    IO.puts("Here are some errors that need to be resolved:")
+    Enum.each(errors, &IO.puts/1)
+    IO.puts("")
+    IO.puts("Run `#{:escript.script_name()} help` for usage")
   end
 
   defp usage do
