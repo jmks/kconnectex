@@ -22,4 +22,7 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 kconnectex-*.tar
 
+# Ignore escript artifacts
+/kconnectex
+
 mix.lock
