@@ -86,6 +86,48 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
+  defp run(%{command: ["connectors"], url: url}) do
+    url
+    |> Kconnectex.client()
+    |> Kconnectex.Connectors.list()
+    |> display()
+  end
+
+  defp run(%{command: ["connectors", "create", connector], url: url}) do
+    case read_stdin() do
+      {:ok, json} ->
+        url
+        |> Kconnectex.client()
+        |> Kconnectex.Connectors.create(connector, json)
+        |> display()
+
+      {:error, err} ->
+        display_errors([Jason.DecodeError.message(err)])
+    end
+  end
+
+  defp run(%{command: ["connectors", "update", connector], url: url}) do
+    case read_stdin() do
+      {:ok, json} ->
+        url
+        |> Kconnectex.client()
+        |> Kconnectex.Connectors.update(connector, json)
+        |> display()
+
+      {:error, err} ->
+        display_errors([Jason.DecodeError.message(err)])
+    end
+  end
+
+  defp run(%{command: ["connectors", subcommand, connector], url: url})
+       when subcommand in ~w(config delete info pause restart resume status) do
+    sub = String.to_atom(subcommand)
+    client = Kconnectex.client(url)
+
+    apply(Kconnectex.Connectors, sub, [client, connector])
+    |> display()
+  end
+
   defp run(opts) do
     command = Enum.join(opts.command, " ")
 
@@ -100,6 +142,11 @@ defmodule Kconnectex.CLI do
     |> IO.puts()
   end
 
+  defp display({:error, %{"message" => message}}) do
+    IO.puts("Error with request:")
+    IO.puts(error_description([message]))
+  end
+
   defp display({:error, errors}) do
     IO.puts("Error with request:")
     IO.puts(error_description(errors))
@@ -108,6 +155,8 @@ defmodule Kconnectex.CLI do
   defp error_description(:econnrefused), do: "  Connection to server failed"
 
   defp error_description(:not_found), do: "  Not found"
+
+  defp error_description(:rebalancing), do: "  Connect is rebalancing. Try again later."
 
   defp error_description(errors) when is_list(errors) do
     errors
