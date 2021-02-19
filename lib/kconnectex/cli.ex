@@ -13,15 +13,17 @@ defmodule Kconnectex.CLI do
     end
   end
 
-  defp run(%{command: ["help"]}) do
-    usage()
-  end
+  defp run(%{command: ["help"]}), do: help(:usage)
+
+  defp run(%{command: ["cluster", "help"]}), do: help(:cluster)
 
   defp run(%{command: ["cluster", "info"], url: url}) do
     client(url)
     |> Kconnectex.Cluster.info()
     |> display()
   end
+
+  defp run(%{command: ["loggers", "help"]}), do: help(:loggers)
 
   defp run(%{command: ["loggers"], url: url}) do
     client(url)
@@ -41,6 +43,8 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
+  defp run(%{command: ["plugins", "help"]}), do: help(:plugins)
+
   defp run(%{command: ["plugins"], url: url}) do
     client(url)
     |> Kconnectex.ConnectorPlugins.list()
@@ -59,6 +63,8 @@ defmodule Kconnectex.CLI do
     end
   end
 
+  defp run(%{command: ["tasks", "help"]}), do: help(:tasks)
+
   defp run(%{command: ["tasks", connector], url: url}) do
     client(url)
     |> Kconnectex.Tasks.list(connector)
@@ -76,6 +82,8 @@ defmodule Kconnectex.CLI do
     |> Kconnectex.Tasks.restart(connector, task_id)
     |> display()
   end
+
+  defp run(%{command: ["connectors", "help"]}), do: help(:connectors)
 
   defp run(%{command: ["connectors"], url: url}) do
     client(url)
@@ -166,11 +174,9 @@ defmodule Kconnectex.CLI do
     |> Jason.decode()
   end
 
-  defp usage do
-    version = Application.spec(:kconnectex, :vsn)
-
+  defp help(:usage) do
     IO.puts("""
-    Kconnectex CLI (version #{version})
+    #{help_header()}
 
     Global options:
       --url
@@ -185,5 +191,101 @@ defmodule Kconnectex.CLI do
 
       help (this!)
     """)
+  end
+
+  defp help(:cluster) do
+    IO.puts("""
+    #{help_header()}
+
+    cluster info
+      Display information about Kafka Connect cluster
+    """)
+  end
+
+  defp help(:loggers) do
+    IO.puts("""
+    #{help_header()}
+
+    loggers
+      List logger levels on the Connect worker
+
+    loggers LOGGER
+      Get the logger level of the given LOGGER
+
+    loggers LOGGER LEVEL
+      Set the logger level to LEVEL of the given LOGGER
+    """)
+  end
+
+  defp help(:plugins) do
+    IO.puts("""
+    #{help_header()}
+
+    plugins
+      List plugins installed on Connect worker
+
+    plugins validate
+      Validate connector plugin configuration.
+      Configuration is read from STDIN and assumed to be JSON.
+    """)
+  end
+
+  defp help(:tasks) do
+    IO.puts("""
+    #{help_header()}
+
+    tasks CONNECTOR
+      List tasks for a given CONNECTOR.
+
+    tasks status CONNECTOR TASK_ID
+      Get status of the TASK_ID for a given CONNECTOR.
+
+    tasks restart CONNECTOR TASK_ID
+      Restart TASK_ID for a given CONNECTOR.
+    """)
+  end
+
+  defp help(:connectors) do
+    IO.puts("""
+    #{help_header()}
+
+    connectors
+      Lists connectors.
+
+    connectors config CONNECTOR
+      Get configuration for the given CONNECTOR.
+
+    connectors create CONNECTOR
+      Create a connector with name CONNECTOR.
+      Configuration is read from STDIN and assumed to be JSON.
+
+    connectors delete CONNECTOR
+      Delete the given CONNECTOR.
+
+    connectors info CONNECTOR
+      Get configuration and tasks for the given CONNECTOR.
+
+    connectors pause CONNECTOR
+      Pause the given CONNECTOR.
+
+    connectors restart CONNECTOR
+      Restart the given CONNECTOR.
+
+    connectors resume CONNECTOR
+      Resume the given CONNECTOR.
+
+    connectors status CONNECTOR
+      Get status of the given CONNECTOR.
+
+    connectors update CONNECTOR
+      Update configuration for the given CONNECTOR.
+      Configuration is read from STDIN and assumed to be JSON.
+    """)
+  end
+
+  defp help_header do
+    version = Application.spec(:kconnectex, :vsn)
+
+    "Kafka Connect CLI (version #{version})"
   end
 end
