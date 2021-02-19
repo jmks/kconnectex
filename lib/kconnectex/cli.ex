@@ -31,13 +31,15 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
-  defp run(%{command: ["loggers", logger], url: url}) do
+  defp run(%{command: ["logger", "help"]}), do: help(:loggers)
+
+  defp run(%{command: ["logger", logger], url: url}) do
     client(url)
     |> Kconnectex.Admin.logger_level(logger)
     |> display()
   end
 
-  defp run(%{command: ["loggers", logger, level], url: url}) do
+  defp run(%{command: ["logger", logger, level], url: url}) do
     client(url)
     |> Kconnectex.Admin.logger_level(logger, level)
     |> display()
@@ -71,13 +73,15 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
-  defp run(%{command: ["tasks", "status", connector, task_id], url: url}) do
+  defp run(%{command: ["task", "help"]}), do: help(:tasks)
+
+  defp run(%{command: ["task", "status", connector, task_id], url: url}) do
     client(url)
     |> Kconnectex.Tasks.status(connector, task_id)
     |> display()
   end
 
-  defp run(%{command: ["tasks", "restart", connector, task_id], url: url}) do
+  defp run(%{command: ["task", "restart", connector, task_id], url: url}) do
     client(url)
     |> Kconnectex.Tasks.restart(connector, task_id)
     |> display()
@@ -91,7 +95,9 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
-  defp run(%{command: ["connectors", "create", connector], url: url}) do
+  defp run(%{command: ["connector", "help"]}), do: help(:connectors)
+
+  defp run(%{command: ["connector", "create", connector], url: url}) do
     case read_stdin() do
       {:ok, json} ->
         client(url)
@@ -103,7 +109,7 @@ defmodule Kconnectex.CLI do
     end
   end
 
-  defp run(%{command: ["connectors", "update", connector], url: url}) do
+  defp run(%{command: ["connector", "update", connector], url: url}) do
     case read_stdin() do
       {:ok, json} ->
         client(url)
@@ -115,7 +121,7 @@ defmodule Kconnectex.CLI do
     end
   end
 
-  defp run(%{command: ["connectors", subcommand, connector], url: url})
+  defp run(%{command: ["connector", subcommand, connector], url: url})
        when subcommand in ~w(config delete info pause restart resume status) do
     sub = String.to_atom(subcommand)
 
@@ -185,9 +191,12 @@ defmodule Kconnectex.CLI do
     Commands:
       cluster
       loggers
+      logger
       plugins
       connectors
+      connector
       tasks
+      task
 
       help (this!)
     """)
@@ -209,11 +218,11 @@ defmodule Kconnectex.CLI do
     loggers
       List logger levels on the Connect worker
 
-    loggers LOGGER
+    logger LOGGER
       Get the logger level of the given LOGGER
 
-    loggers LOGGER LEVEL
-      Set the logger level to LEVEL of the given LOGGER
+    logger LOGGER LEVEL
+      Set the logger level to LEVEL for the given LOGGER
     """)
   end
 
@@ -237,10 +246,10 @@ defmodule Kconnectex.CLI do
     tasks CONNECTOR
       List tasks for a given CONNECTOR.
 
-    tasks status CONNECTOR TASK_ID
+    task status CONNECTOR TASK_ID
       Get status of the TASK_ID for a given CONNECTOR.
 
-    tasks restart CONNECTOR TASK_ID
+    task restart CONNECTOR TASK_ID
       Restart TASK_ID for a given CONNECTOR.
     """)
   end
@@ -252,32 +261,32 @@ defmodule Kconnectex.CLI do
     connectors
       Lists connectors.
 
-    connectors config CONNECTOR
+    connector config CONNECTOR
       Get configuration for the given CONNECTOR.
 
-    connectors create CONNECTOR
+    connector create CONNECTOR
       Create a connector with name CONNECTOR.
       Configuration is read from STDIN and assumed to be JSON.
 
-    connectors delete CONNECTOR
+    connector delete CONNECTOR
       Delete the given CONNECTOR.
 
-    connectors info CONNECTOR
+    connector info CONNECTOR
       Get configuration and tasks for the given CONNECTOR.
 
-    connectors pause CONNECTOR
+    connector pause CONNECTOR
       Pause the given CONNECTOR.
 
-    connectors restart CONNECTOR
+    connector restart CONNECTOR
       Restart the given CONNECTOR.
 
-    connectors resume CONNECTOR
+    connector resume CONNECTOR
       Resume the given CONNECTOR.
 
-    connectors status CONNECTOR
+    connector status CONNECTOR
       Get status of the given CONNECTOR.
 
-    connectors update CONNECTOR
+    connector update CONNECTOR
       Update configuration for the given CONNECTOR.
       Configuration is read from STDIN and assumed to be JSON.
     """)

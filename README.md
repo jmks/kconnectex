@@ -6,7 +6,9 @@ Currently under development.
 
 ## CLI
 
-This library includes an escript. It can be built and display its help:
+This library includes an escript. It is inspired by [kaf](https://github.com/birdayz/kaf) for Kafka.
+
+It can be built and display its help:
 
 ```
 $ mix escript.build
@@ -32,8 +34,6 @@ $ ./kconnectex
 * strictly output JSON?
 * `completion` command to generate script for bash, zsh
 * `config` command to manage config state
-* singular command when working on individual things?
-  * e.g. `connectors` lists connectors but `connector delete` would delete a connector
 
 ## Development
 
