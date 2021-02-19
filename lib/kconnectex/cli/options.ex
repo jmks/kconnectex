@@ -17,7 +17,7 @@ defmodule Kconnectex.CLI.Options do
   defp add_url(opts, url: url), do: %{opts | url: url}
 
   defp add_url(opts, _) do
-    if opts.command == ["help"] do
+    if opts.command == ["help"] or List.last(opts.command) == "help" do
       opts
     else
       %{opts | errors: ["--url is required" | opts.errors]}
