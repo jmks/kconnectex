@@ -18,36 +18,31 @@ defmodule Kconnectex.CLI do
   end
 
   defp run(%{command: ["cluster", "info"], url: url}) do
-    url
-    |> Kconnectex.client()
+    client(url)
     |> Kconnectex.Cluster.info()
     |> display()
   end
 
   defp run(%{command: ["loggers"], url: url}) do
-    url
-    |> Kconnectex.client()
+    client(url)
     |> Kconnectex.Admin.loggers()
     |> display()
   end
 
   defp run(%{command: ["loggers", logger], url: url}) do
-    url
-    |> Kconnectex.client()
+    client(url)
     |> Kconnectex.Admin.logger_level(logger)
     |> display()
   end
 
   defp run(%{command: ["loggers", logger, level], url: url}) do
-    url
-    |> Kconnectex.client()
+    client(url)
     |> Kconnectex.Admin.logger_level(logger, level)
     |> display()
   end
 
   defp run(%{command: ["plugins"], url: url}) do
-    url
-    |> Kconnectex.client()
+    client(url)
     |> Kconnectex.ConnectorPlugins.list()
     |> display()
   end
@@ -55,8 +50,7 @@ defmodule Kconnectex.CLI do
   defp run(%{command: ["plugins", "validate"], url: url}) do
     case read_stdin() do
       {:ok, json} ->
-        url
-        |> Kconnectex.client()
+        client(url)
         |> Kconnectex.ConnectorPlugins.validate_config(json)
         |> display()
 
@@ -66,29 +60,25 @@ defmodule Kconnectex.CLI do
   end
 
   defp run(%{command: ["tasks", connector], url: url}) do
-    url
-    |> Kconnectex.client()
+    client(url)
     |> Kconnectex.Tasks.list(connector)
     |> display()
   end
 
   defp run(%{command: ["tasks", "status", connector, task_id], url: url}) do
-    url
-    |> Kconnectex.client()
+    client(url)
     |> Kconnectex.Tasks.status(connector, task_id)
     |> display()
   end
 
   defp run(%{command: ["tasks", "restart", connector, task_id], url: url}) do
-    url
-    |> Kconnectex.client()
+    client(url)
     |> Kconnectex.Tasks.restart(connector, task_id)
     |> display()
   end
 
   defp run(%{command: ["connectors"], url: url}) do
-    url
-    |> Kconnectex.client()
+    client(url)
     |> Kconnectex.Connectors.list()
     |> display()
   end
@@ -96,8 +86,7 @@ defmodule Kconnectex.CLI do
   defp run(%{command: ["connectors", "create", connector], url: url}) do
     case read_stdin() do
       {:ok, json} ->
-        url
-        |> Kconnectex.client()
+        client(url)
         |> Kconnectex.Connectors.create(connector, json)
         |> display()
 
@@ -109,8 +98,7 @@ defmodule Kconnectex.CLI do
   defp run(%{command: ["connectors", "update", connector], url: url}) do
     case read_stdin() do
       {:ok, json} ->
-        url
-        |> Kconnectex.client()
+        client(url)
         |> Kconnectex.Connectors.update(connector, json)
         |> display()
 
@@ -122,9 +110,8 @@ defmodule Kconnectex.CLI do
   defp run(%{command: ["connectors", subcommand, connector], url: url})
        when subcommand in ~w(config delete info pause restart resume status) do
     sub = String.to_atom(subcommand)
-    client = Kconnectex.client(url)
 
-    apply(Kconnectex.Connectors, sub, [client, connector])
+    apply(Kconnectex.Connectors, sub, [client(url), connector])
     |> display()
   end
 
@@ -133,6 +120,8 @@ defmodule Kconnectex.CLI do
 
     display_errors(["`#{command}` was not understood"])
   end
+
+  defp client(url), do: Kconnectex.client(url)
 
   defp display(:ok), do: IO.puts("Success")
 
