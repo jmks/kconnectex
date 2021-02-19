@@ -3,8 +3,14 @@ defmodule Kconnectex.CLI.OptionsTest do
 
   alias Kconnectex.CLI.Options
 
+  test "usage" do
+    opts = Options.parse(["--help"])
+
+    assert opts.help?
+  end
+
   test "--url is required" do
-    opts = Options.parse([])
+    opts = Options.parse(["connectors"])
 
     assert "--url is required" in opts.errors
   end
@@ -18,7 +24,7 @@ defmodule Kconnectex.CLI.OptionsTest do
   test "no command defaults to help" do
     opts = Options.parse([])
 
-    assert ["help"] == opts.command
+    assert opts.help?
   end
 
   test "a valid command" do

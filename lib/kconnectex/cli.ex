@@ -13,9 +13,20 @@ defmodule Kconnectex.CLI do
     end
   end
 
-  defp run(%{command: ["help"]}), do: help(:usage)
-
-  defp run(%{command: ["cluster", "help"]}), do: help(:cluster)
+  defp run(%{help?: true, command: context} = opts) do
+    case context do
+      ["cluster" | _] -> help(:cluster)
+      ["loggers" | _] -> help(:loggers)
+      ["logger" | _] -> help(:loggers)
+      ["plugins" | _] -> help(:plugins)
+      ["tasks" | _] -> help(:tasks)
+      ["task" | _] -> help(:tasks)
+      ["connectors" | _] -> help(:connectors)
+      ["connector" | _] -> help(:connectors)
+      [] -> help(:usage)
+      _ -> unknown_command(opts)
+    end
+  end
 
   defp run(%{command: ["cluster", "info"], url: url}) do
     client(url)
@@ -23,15 +34,11 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
-  defp run(%{command: ["loggers", "help"]}), do: help(:loggers)
-
   defp run(%{command: ["loggers"], url: url}) do
     client(url)
     |> Kconnectex.Admin.loggers()
     |> display()
   end
-
-  defp run(%{command: ["logger", "help"]}), do: help(:loggers)
 
   defp run(%{command: ["logger", logger], url: url}) do
     client(url)
@@ -44,8 +51,6 @@ defmodule Kconnectex.CLI do
     |> Kconnectex.Admin.logger_level(logger, level)
     |> display()
   end
-
-  defp run(%{command: ["plugins", "help"]}), do: help(:plugins)
 
   defp run(%{command: ["plugins"], url: url}) do
     client(url)
@@ -65,15 +70,11 @@ defmodule Kconnectex.CLI do
     end
   end
 
-  defp run(%{command: ["tasks", "help"]}), do: help(:tasks)
-
   defp run(%{command: ["tasks", connector], url: url}) do
     client(url)
     |> Kconnectex.Tasks.list(connector)
     |> display()
   end
-
-  defp run(%{command: ["task", "help"]}), do: help(:tasks)
 
   defp run(%{command: ["task", "status", connector, task_id], url: url}) do
     client(url)
@@ -87,15 +88,11 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
-  defp run(%{command: ["connectors", "help"]}), do: help(:connectors)
-
   defp run(%{command: ["connectors"], url: url}) do
     client(url)
     |> Kconnectex.Connectors.list()
     |> display()
   end
-
-  defp run(%{command: ["connector", "help"]}), do: help(:connectors)
 
   defp run(%{command: ["connector", "create", connector], url: url}) do
     case read_stdin() do
@@ -129,11 +126,7 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
-  defp run(opts) do
-    command = Enum.join(opts.command, " ")
-
-    display_errors(["`#{command}` was not understood"])
-  end
+  defp run(opts), do: unknown_command(opts)
 
   defp client(url), do: Kconnectex.client(url)
 
@@ -174,6 +167,12 @@ defmodule Kconnectex.CLI do
     IO.puts("Run `#{:escript.script_name()} help` for usage")
   end
 
+  defp unknown_command(opts) do
+    command = Enum.join(opts.command, " ")
+
+    display_errors(["Command `#{command}` was not recognized"])
+  end
+
   defp read_stdin do
     IO.read(:stdio, :all)
     |> String.trim()
@@ -187,18 +186,18 @@ defmodule Kconnectex.CLI do
     Global options:
       --url
         URL to Kafka Connect Cluster
+      --help
+        Display usage or help for commands
 
     Commands:
       cluster
+      connectors
+      connector
       loggers
       logger
       plugins
-      connectors
-      connector
       tasks
       task
-
-      help (this!)
     """)
   end
 

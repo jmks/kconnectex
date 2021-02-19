@@ -1,28 +1,30 @@
 defmodule Kconnectex.CLI.Options do
   defstruct [
     :url,
+    help?: false,
     command: [],
     errors: []
   ]
 
   def parse(args) do
-    {parsed, command, invalid} = OptionParser.parse(args, strict: [url: :string])
+    {parsed, command, invalid} = OptionParser.parse(args, strict: [url: :string, help: :boolean])
 
     %__MODULE__{}
+    |> set_help(Keyword.get(parsed, :help, false))
     |> with_command(command)
-    |> add_url(parsed)
+    |> set_url(Keyword.get(parsed, :url))
     |> add_errors(invalid)
   end
 
-  defp add_url(opts, url: url), do: %{opts | url: url}
+  defp set_help(opts, help), do: %{opts | help?: help}
 
-  defp add_url(opts, _) do
-    if opts.command == ["help"] or List.last(opts.command) == "help" do
-      opts
-    else
-      %{opts | errors: ["--url is required" | opts.errors]}
-    end
+  defp set_url(%{help?: true} = opts, nil), do: opts
+
+  defp set_url(opts, nil) do
+    %{opts | errors: ["--url is required" | opts.errors]}
   end
+
+  defp set_url(opts, url), do: %{opts | url: url}
 
   defp add_errors(opts, invalid) do
     messages =
@@ -34,7 +36,7 @@ defmodule Kconnectex.CLI.Options do
   end
 
   defp with_command(opts, []) do
-    %{opts | command: ["help"]}
+    %{opts | help?: true}
   end
 
   defp with_command(opts, command) do
