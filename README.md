@@ -4,6 +4,15 @@ Elixir API wrapper for the [Kafka Connect API](https://docs.confluent.io/platfor
 
 Currently under development.
 
+## CLI
+
+This library includes an escript. It can be built and display its help:
+
+```
+$ mix escript.build
+$ ./kconnectex
+```
+
 ## TODO
 
 ### Connectors
@@ -18,6 +27,13 @@ Currently under development.
 * Having a "client" and request seems redundant??
 * Add more integration tests (with FileStreamSource)
 * Validating a config where the connector name does not match config => 500 from Connect (bug?)
+
+### CLI
+* strictly output JSON?
+* `completion` command to generate script for bash, zsh
+* `config` command to manage config state
+* singular command when working on individual things?
+  * e.g. `connectors` lists connectors but `connector delete` would delete a connector
 
 ## Development
 
@@ -35,6 +51,16 @@ $ mix test --include integration
 ```
 
 ## Installation
+
+It's not in hex yet, but the adventurous can grab it from Github:
+
+```elixir
+def deps do
+  [
+    {:kconnectex, git: "https://github.com/jmks/kconnectex.git"}
+  ]
+end
+```
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 by adding `kconnectex` to your list of dependencies in `mix.exs`:
