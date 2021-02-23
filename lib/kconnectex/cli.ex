@@ -28,7 +28,7 @@ defmodule Kconnectex.CLI do
     end
   end
 
-  defp run(%{command: ["cluster", "info"], url: url}) do
+  defp run(%{command: ["cluster"], url: url}) do
     client(url)
     |> Kconnectex.Cluster.info()
     |> display()
