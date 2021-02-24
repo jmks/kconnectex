@@ -205,7 +205,7 @@ defmodule Kconnectex.CLI do
     IO.puts("""
     #{help_header()}
 
-    cluster info
+    cluster
       Display information about Kafka Connect cluster
     """)
   end
