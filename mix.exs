@@ -28,7 +28,8 @@ defmodule Kconnectex.MixProject do
 
       {:tesla, "~> 1.4.0"},
       {:hackney, "~> 1.16.0"},
-      {:jason, ">= 1.0.0"}
+      {:jason, ">= 1.0.0"},
+      {:toml, "~> 0.6.1"}
     ]
   end
 
