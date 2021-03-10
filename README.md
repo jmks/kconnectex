@@ -8,7 +8,7 @@ Currently under development.
 
 This library includes an escript. It is inspired by [kaf](https://github.com/birdayz/kaf) for Kafka.
 
-It can be built and display its help:
+Build it and display the help:
 
 ```
 $ mix escript.build
@@ -16,6 +16,13 @@ $ ./kconnectex --help
 ```
 
 ## TODO
+
+### General
+* Having a "client" and "request" seems redundant?
+* Add more integration tests (with FileStreamSource)
+* Validating a config where the connector name does not match config => 500 from Connect (bug?)
+* docs for Connectors
+* specs
 
 ### Connectors
 * Support "expand" queries
@@ -25,19 +32,16 @@ $ ./kconnectex --help
 * get
 * reset
 
-### General
-* Having a "client" and request seems redundant??
-* Add more integration tests (with FileStreamSource)
-* Validating a config where the connector name does not match config => 500 from Connect (bug?)
-
 ### CLI
 * strictly output JSON?
 * `completion` command to generate script for bash, zsh
 * `config` command to manage config state
+* Run via docker
+* github.com/bake-bake-bake/bakeware
 
 ## Development
 
-To run the (unit) tests:
+To run the unit tests:
 
 ```
 $ mix test
