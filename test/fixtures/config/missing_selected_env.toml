@@ -1,0 +1,6 @@
+[global]
+
+selected_env = "oranges"
+
+[env.apples]
+host = "http://example.com"
