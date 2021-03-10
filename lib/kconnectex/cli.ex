@@ -1,8 +1,11 @@
 defmodule Kconnectex.CLI do
-  alias Kconnectex.CLI.Options
+  alias Kconnectex.CLI.{Configuration, Options}
 
   def main(args) do
-    opts = Options.parse(args)
+    opts =
+      args
+      |> Options.parse()
+      |> Options.update(Configuration.load())
 
     case opts.errors do
       [] ->

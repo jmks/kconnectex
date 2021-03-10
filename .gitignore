@@ -25,4 +25,7 @@ kconnectex-*.tar
 # Ignore escript artifacts
 /kconnectex
 
+# Ignore local config file
+.kconnectex.toml
+
 mix.lock

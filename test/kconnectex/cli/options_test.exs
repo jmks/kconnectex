@@ -34,4 +34,39 @@ defmodule Kconnectex.CLI.OptionsTest do
     assert opts.command == ["cluster", "info"]
     assert opts.errors == []
   end
+
+  describe "update" do
+    test "use selected url if configured" do
+      opts = %Options{url: nil, errors: ["--url is required"]}
+
+      config = %{
+        "global" => %{"selected_env" => "local"},
+        "env" => %{
+          "local" => %{"host" => "localhost", "port" => 9999}
+        }
+      }
+
+      assert %{url: "localhost:9999", errors: []} = Options.update(opts, {:ok, config})
+    end
+
+    test "uses 8083 as default port if port not configured" do
+      opts = %Options{url: nil, errors: ["--url is required"]}
+
+      config = %{
+        "global" => %{"selected_env" => "local"},
+        "env" => %{
+          "local" => %{"host" => "localhost"}
+        }
+      }
+
+      assert %{url: "localhost:8083", errors: []} = Options.update(opts, {:ok, config})
+    end
+
+    test "keeps --url option if not configured" do
+      opts = %Options{url: "remote-host:8080"}
+      config = %{"env" => %{"local" => %{"host" => "localhost"}}}
+
+      assert %{url: "remote-host:8080"} = Options.update(opts, {:ok, config})
+    end
+  end
 end
