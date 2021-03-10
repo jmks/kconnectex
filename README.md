@@ -12,7 +12,7 @@ It can be built and display its help:
 
 ```
 $ mix escript.build
-$ ./kconnectex
+$ ./kconnectex --help
 ```
 
 ## TODO
