@@ -1,6 +1,8 @@
 defmodule Kconnectex.CLI do
   alias Kconnectex.CLI.{Configuration, Options}
 
+  @default_port 8083
+
   def main(args) do
     opts =
       args
@@ -26,9 +28,14 @@ defmodule Kconnectex.CLI do
       ["task" | _] -> help(:tasks)
       ["connectors" | _] -> help(:connectors)
       ["connector" | _] -> help(:connectors)
+      ["config" | _] -> help(:config)
       [] -> help(:usage)
       _ -> unknown_command(opts)
     end
+  end
+
+  defp run(%{command: ["config"]} = opts) do
+    display_config(opts.config)
   end
 
   defp run(%{command: ["cluster"], url: url}) do
@@ -133,6 +140,34 @@ defmodule Kconnectex.CLI do
 
   defp client(url), do: Kconnectex.client(url)
 
+  defp display_config(:no_configuration) do
+    IO.puts("No configuration file found.")
+  end
+
+  defp display_config(config) do
+    selected = get_in(config, ["global", "selected_env"])
+    envs = get_in(config, ["env"]) || %{}
+
+    if map_size(envs) > 0 do
+      names = Enum.map(Map.keys(envs), fn name ->
+        display_name = if name == selected, do: "*#{name}", else: name
+
+        {name, display_name}
+      end)
+      max = Enum.map(names, fn {_, name} -> String.length(name) end) |> Enum.max()
+
+      Enum.each(names, fn {name, display_name} ->
+        env = Map.fetch!(envs, name)
+        host = Map.fetch!(env, "host")
+        port = Map.get(env, "port", @default_port)
+
+        IO.puts("#{String.pad_trailing(display_name, max, " ")} #{host}:#{port}")
+      end)
+    else
+      IO.puts("No environments configured. See `config --help` for more info.")
+    end
+  end
+
   defp display(:ok), do: IO.puts("Success")
 
   defp display({:ok, result}) do
@@ -194,6 +229,7 @@ defmodule Kconnectex.CLI do
 
     Commands:
       cluster
+      config
       connectors
       connector
       loggers
@@ -210,6 +246,26 @@ defmodule Kconnectex.CLI do
 
     cluster
       Display information about Kafka Connect cluster
+    """)
+  end
+
+  defp help(:config) do
+    IO.puts("""
+    #{help_header()}
+
+    config
+      Display current configuration
+
+    config add NAME HOST PORT
+      Add a new environment to the configuration file.
+      NAME is the environment name.
+      PORT is optional; default: 8083
+
+    config remove NAME
+      Remove NAME environment from configuration file.
+
+    config select NAME
+      Select NAME as the default environment.
     """)
   end
 

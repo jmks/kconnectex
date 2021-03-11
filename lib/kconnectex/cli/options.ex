@@ -3,6 +3,7 @@ defmodule Kconnectex.CLI.Options do
     :url,
     help?: false,
     command: [],
+    config: :no_configuration,
     errors: []
   ]
 
@@ -27,7 +28,8 @@ defmodule Kconnectex.CLI.Options do
       %{
         opts
         | url: "#{host}:#{port}",
-          errors: Enum.reject(opts.errors, &String.contains?(&1, "--url"))
+          errors: Enum.reject(opts.errors, &String.contains?(&1, "--url")),
+          config: config
       }
     else
       opts
