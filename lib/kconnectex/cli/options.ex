@@ -44,6 +44,10 @@ defmodule Kconnectex.CLI.Options do
 
   defp set_url(%{help?: true} = opts, nil), do: opts
 
+  defp set_url(%{command: ["config" | _]} = opts, nil) do
+    opts
+  end
+
   defp set_url(opts, nil) do
     %{opts | errors: ["--url is required" | opts.errors]}
   end
