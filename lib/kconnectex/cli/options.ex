@@ -19,7 +19,7 @@ defmodule Kconnectex.CLI.Options do
     |> add_errors(invalid)
   end
 
-  def update(%{} = opts, {:ok, config}) do
+  def update(opts, {:ok, config}) do
     selected = get_in(config, ["global", "selected_env"])
     host = get_in(config, ["env", selected, "host"])
     port = get_in(config, ["env", selected, "port"]) || @default_port
@@ -44,9 +44,7 @@ defmodule Kconnectex.CLI.Options do
 
   defp set_url(%{help?: true} = opts, nil), do: opts
 
-  defp set_url(%{command: ["config" | _]} = opts, nil) do
-    opts
-  end
+  defp set_url(%{command: ["config" | _]} = opts, nil), do: opts
 
   defp set_url(opts, nil) do
     %{opts | errors: ["--url is required" | opts.errors]}
