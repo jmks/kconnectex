@@ -9,10 +9,23 @@ defmodule Kconnectex.CLI.OptionsTest do
     assert opts.help?
   end
 
-  test "--url is required" do
+  test "--url or --cluster required" do
     opts = Options.parse(["connectors"])
 
     assert "--url is required" in opts.errors
+  end
+
+  test "--cluster" do
+    opts = Options.parse(["--cluster", "apple"])
+
+    assert opts.cluster == "apple"
+  end
+
+  test "--url prefered over --cluster" do
+    opts = Options.parse(["--cluster", "apple", "--url", "example.com"])
+
+    assert opts.url == "example.com"
+    assert opts.cluster == :no_configuration
   end
 
   test "unexpected options are errors" do

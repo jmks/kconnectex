@@ -1,21 +1,21 @@
 defmodule Kconnectex.CLI.Options do
-  defstruct [
-    :url,
-    help?: false,
-    command: [],
-    config: :no_configuration,
-    errors: []
-  ]
+  defstruct url: :no_configuration,
+            cluster: :no_configuration,
+            help?: false,
+            command: [],
+            config: :no_configuration,
+            errors: []
 
   @default_port 8083
 
   def parse(args) do
-    {parsed, command, invalid} = OptionParser.parse(args, strict: [url: :string, help: :boolean])
+    flags = [url: :string, help: :boolean, cluster: :string]
+    {parsed, command, invalid} = OptionParser.parse(args, strict: flags)
 
     %__MODULE__{}
     |> set_help(Keyword.get(parsed, :help, false))
     |> with_command(command)
-    |> set_url(Keyword.get(parsed, :url))
+    |> set_cluster(Keyword.get(parsed, :url), Keyword.get(parsed, :cluster))
     |> add_errors(invalid)
   end
 
@@ -42,15 +42,17 @@ defmodule Kconnectex.CLI.Options do
 
   defp set_help(opts, help), do: %{opts | help?: help}
 
-  defp set_url(%{help?: true} = opts, nil), do: opts
+  defp set_cluster(%{help?: true} = opts, nil, nil), do: opts
 
-  defp set_url(%{command: ["config" | _]} = opts, nil), do: opts
+  defp set_cluster(%{command: ["config" | _]} = opts, nil, nil), do: opts
 
-  defp set_url(opts, nil) do
+  defp set_cluster(opts, nil, nil) do
     %{opts | errors: ["--url is required" | opts.errors]}
   end
 
-  defp set_url(opts, url), do: %{opts | url: url}
+  defp set_cluster(opts, url, _) when not is_nil(url), do: %{opts | url: url}
+
+  defp set_cluster(opts, nil, cluster) when not is_nil(cluster), do: %{opts | cluster: cluster}
 
   defp add_errors(opts, invalid) do
     messages =

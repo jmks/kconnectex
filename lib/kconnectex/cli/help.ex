@@ -7,6 +7,8 @@ defmodule Kconnectex.CLI.Help do
     Global options:
       --url
         URL to Kafka Connect Cluster
+      --cluster NAME
+        Use NAME configured cluster
       --help
         Display usage or help for commands
 
