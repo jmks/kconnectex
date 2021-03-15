@@ -38,17 +38,6 @@ defmodule Kconnectex.CLI.Help do
 
     config
       Display current configuration
-
-    config add NAME HOST PORT
-      Add a new environment to the configuration file.
-      NAME is the environment name.
-      PORT is optional; default: 8083
-
-    config remove NAME
-      Remove NAME environment from configuration file.
-
-    config select NAME
-      Select NAME as the default environment.
     """)
   end
 

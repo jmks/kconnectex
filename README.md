@@ -35,9 +35,15 @@ $ ./kconnectex --help
 ### CLI
 * strictly output JSON?
 * `completion` command to generate script for bash, zsh
-* `config` command to manage config state
 * Run via docker
 * github.com/bake-bake-bake/bakeware
+
+#### config
+
+* Find a way to write TOML without writing an encoder.
+* add
+* select
+* remove
 
 ## Development
 
