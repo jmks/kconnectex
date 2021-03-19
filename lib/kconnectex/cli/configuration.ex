@@ -23,7 +23,8 @@ defmodule Kconnectex.CLI.Configuration do
   end
 
   defp config_file(:use_home_or_local) do
-    files = default_files() |> Enum.filter(&File.exists?/1)
+    searched_files = default_files()
+    files = Enum.filter(searched_files, &File.exists?/1)
 
     if Enum.any?(files) do
       {:ok, hd(files)}
@@ -31,7 +32,7 @@ defmodule Kconnectex.CLI.Configuration do
       message = [
         "could not find configuration file",
         "Looked for: "
-        | default_files() |> Enum.map(fn msg -> "  #{msg}" end)
+        | Enum.map(searched_files, fn msg -> "  #{msg}" end)
       ]
 
       {:error, message}
