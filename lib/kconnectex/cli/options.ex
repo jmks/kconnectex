@@ -19,25 +19,59 @@ defmodule Kconnectex.CLI.Options do
     |> add_errors(invalid)
   end
 
-  def update(opts, {:ok, config}) do
-    selected = get_in(config, ["global", "selected_env"])
-    host = get_in(config, ["env", selected, "host"])
-    port = get_in(config, ["env", selected, "port"]) || @default_port
-
-    if selected do
-      %{
+  def update(%{cluster: cluster} = opts, {:ok, config}) do
+    case select_cluster(cluster, config) do
+      {:ok, :use_url} ->
         opts
-        | url: "#{host}:#{port}",
-          errors: Enum.reject(opts.errors, &String.contains?(&1, "--url")),
-          config: config
-      }
-    else
-      opts
+
+      {:ok, host, port} ->
+        %{
+          opts
+          | url: "#{host}:#{port}",
+            errors: Enum.reject(opts.errors, &String.contains?(&1, "--url")),
+            config: config
+        }
+
+      {:error, :invalid_cluster, bad_cluster} ->
+        %{opts | errors: ["Cluster #{bad_cluster} was not found in the configuration"]}
+
+      {:error, :invalid_config, bad_cluster} ->
+        %{opts | errors: ["Selected cluster #{bad_cluster} was not found in the configuration"]}
     end
   end
 
   def update(opts, _) do
     opts
+  end
+
+  defp select_cluster(:no_configuration, config) do
+    use_selected_cluster(config)
+  end
+
+  defp select_cluster(cluster, config) do
+    cluster_env = get_in(config, ["env", cluster])
+
+    if cluster_env do
+      {:ok, Map.fetch!(cluster_env, "host"), Map.get(cluster_env, "port", @default_port)}
+    else
+      {:error, :invalid_cluster, cluster}
+    end
+  end
+
+  defp use_selected_cluster(config) do
+    selected = get_in(config, ["global", "selected_env"])
+    selected_env = get_in(config, ["env", selected])
+
+    cond do
+      selected && is_nil(selected_env) ->
+        {:error, :invalid_config, selected}
+
+      selected_env ->
+        {:ok, Map.fetch!(selected_env, "host"), Map.get(selected_env, "port", @default_port)}
+
+      true ->
+        {:ok, :use_url}
+    end
   end
 
   defp set_help(opts, help), do: %{opts | help?: help}

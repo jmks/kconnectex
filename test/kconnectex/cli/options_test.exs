@@ -49,7 +49,7 @@ defmodule Kconnectex.CLI.OptionsTest do
   end
 
   describe "update" do
-    test "use selected url if configured" do
+    test "use selected cluster if configured" do
       opts = %Options{url: nil, errors: ["--url is required"]}
 
       config = %{
@@ -60,6 +60,18 @@ defmodule Kconnectex.CLI.OptionsTest do
       }
 
       assert %{url: "localhost:9999", errors: []} = Options.update(opts, {:ok, config})
+    end
+
+    test "use --cluster if configured" do
+      opts = %Options{cluster: "test"}
+
+      config = %{
+        "env" => %{
+          "test" => %{"host" => "testhost", "port" => 9999}
+        }
+      }
+
+      assert %{url: "testhost:9999"} = Options.update(opts, {:ok, config})
     end
 
     test "uses 8083 as default port if port not configured" do
@@ -75,11 +87,31 @@ defmodule Kconnectex.CLI.OptionsTest do
       assert %{url: "localhost:8083", errors: []} = Options.update(opts, {:ok, config})
     end
 
-    test "keeps --url option if not configured" do
+    test "keep --url option if not configured" do
       opts = %Options{url: "remote-host:8080"}
       config = %{"env" => %{"local" => %{"host" => "localhost"}}}
 
       assert %{url: "remote-host:8080"} = Options.update(opts, {:ok, config})
+    end
+
+    test "adds error when --cluster does not exist" do
+      opts = %Options{url: "remote:8080", cluster: "local"}
+      config = %{}
+
+      assert %{errors: ["Cluster local was not found in the configuration"]} =
+               Options.update(opts, {:ok, config})
+    end
+
+    test "adds error when selected cluster does not exist" do
+      opts = %Options{}
+
+      config = %{
+        "global" => %{"selected_env" => "local"},
+        "env" => %{}
+      }
+
+      assert %{errors: ["Selected cluster local was not found in the configuration"]} =
+               Options.update(opts, {:ok, config})
     end
   end
 end
