@@ -1,11 +1,8 @@
 defmodule Kconnectex.CLI.Options do
   alias Kconnectex.CLI.Configuration
 
-  defstruct url: :no_configuration,
-            help?: false,
-            command: [],
-            config: :no_configuration,
-            errors: []
+  @enforce_keys [:config]
+  defstruct [:config, url: :no_configuration, help?: false, command: [], errors: []]
 
   @default_port 8083
 
@@ -14,8 +11,8 @@ defmodule Kconnectex.CLI.Options do
       {:ok, config} ->
         parse(args, config)
 
-      otherwise ->
-        otherwise
+      config_error ->
+        config_error
     end
   end
 
@@ -23,31 +20,27 @@ defmodule Kconnectex.CLI.Options do
     flags = [url: :string, help: :boolean, cluster: :string]
     {parsed, command, invalid} = OptionParser.parse(args, strict: flags)
 
-    %__MODULE__{}
-    |> set_help(Keyword.get(parsed, :help, false))
+    %__MODULE__{
+      help?: Keyword.get(parsed, :help, false),
+      config: config
+    }
     |> with_command(command)
-    |> set_cluster(
-      Keyword.get(parsed, :url, :no_url),
-      Keyword.get(parsed, :cluster, :no_cluster),
-      config
-    )
+    |> set_url(Keyword.get(parsed, :url, :no_url), Keyword.get(parsed, :cluster, :no_cluster))
     |> add_errors(invalid)
   end
 
-  defp set_help(opts, help), do: %{opts | help?: help}
+  defp set_url(options, url, cluster)
 
-  defp set_cluster(options, url, cluster, config)
+  defp set_url(%{help?: true} = opts, :no_url, :no_cluster), do: opts
 
-  defp set_cluster(%{help?: true} = opts, :no_url, :no_cluster, _config), do: opts
+  defp set_url(%{command: ["config" | _]} = opts, :no_url, :no_cluster), do: opts
 
-  defp set_cluster(%{command: ["config" | _]} = opts, :no_url, :no_cluster, _config), do: opts
-
-  defp set_cluster(opts, url, cluster, _config) when url != :no_url and cluster != :no_cluster do
+  defp set_url(opts, url, cluster) when url != :no_url and cluster != :no_cluster do
     %{opts | errors: ["Do not specify both --cluster and --url" | opts.errors]}
   end
 
-  defp set_cluster(opts, url, cluster, config) do
-    case select_cluster(cluster, config) do
+  defp set_url(opts, url, cluster) do
+    case select_cluster(cluster, opts.config) do
       {:ok, host, port} ->
         %{opts | url: "#{host}:#{port}"}
 
