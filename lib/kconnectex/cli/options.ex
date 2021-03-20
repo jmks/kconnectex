@@ -11,6 +11,10 @@ defmodule Kconnectex.CLI.Options do
       {:ok, config} ->
         parse(args, config)
 
+      {:error, :no_configuration_file} ->
+        opts = parse(args, %{})
+        %{opts | config: :no_configuration_file}
+
       config_error ->
         config_error
     end

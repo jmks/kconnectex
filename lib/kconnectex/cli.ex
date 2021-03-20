@@ -139,7 +139,7 @@ defmodule Kconnectex.CLI do
 
   defp client(url), do: Kconnectex.client(url)
 
-  defp display_config(:no_configuration) do
+  defp display_config(:no_configuration_file) do
     IO.puts("No configuration file found.")
   end
 
