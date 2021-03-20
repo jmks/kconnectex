@@ -7,8 +7,8 @@ defmodule Kconnectex.CLI.Configuration do
          {:ok, config} <- validate_config(config) do
       {:ok, config}
     else
-      {:error, error} when is_list(error) or is_binary(error) ->
-        {:error, error}
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
@@ -22,20 +22,35 @@ defmodule Kconnectex.CLI.Configuration do
     end
   end
 
+  def format_error(reason)
+
+  def format_error(:no_configuration_file) do
+    parts = [
+      "Could not find configuration file",
+      "Looked for: "
+      | Enum.map(default_files(), fn msg -> "  #{msg}" end)
+    ]
+
+    Enum.join(parts, "\n")
+  end
+
+  def format_error({:missing_environment, env}) do
+    "Selected environment #{env} does not exist as table [env.#{env}]. Add the table or change the selected_env."
+  end
+
+  def format_error(:missing_host), do: "host is required"
+
+  def format_error(:nonbinary_host), do: "host must be a string"
+
+  def format_error(:noninteger_port), do: "port must be an integer"
+
   defp config_file(:use_home_or_local) do
-    searched_files = default_files()
-    files = Enum.filter(searched_files, &File.exists?/1)
+    files = Enum.filter(default_files(), &File.exists?/1)
 
     if Enum.any?(files) do
       {:ok, hd(files)}
     else
-      message = [
-        "could not find configuration file",
-        "Looked for: "
-        | Enum.map(searched_files, fn msg -> "  #{msg}" end)
-      ]
-
-      {:error, message}
+      {:error, :no_configuration_file}
     end
   end
 
@@ -51,8 +66,7 @@ defmodule Kconnectex.CLI.Configuration do
     if Map.has_key?(envs, env) do
       :ok
     else
-      {:error,
-       "Selected environment #{env} does not exist as table [env.#{env}]. Add the table or change the selected_env."}
+      {:error, {:missing_environment, env}}
     end
   end
 
@@ -73,13 +87,13 @@ defmodule Kconnectex.CLI.Configuration do
   defp validate_env(env) do
     cond do
       not Map.has_key?(env, "host") ->
-        {:error, "host is required"}
+        {:error, :missing_host}
 
       not is_binary(env["host"]) ->
-        {:error, "host must be a string"}
+        {:error, :nonbinary_host}
 
       Map.has_key?(env, "port") and not is_integer(env["port"]) ->
-        {:error, "port must be an integer"}
+        {:error, :noninteger_port}
 
       true ->
         :ok
