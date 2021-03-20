@@ -1,6 +1,7 @@
 defmodule Kconnectex.CLI.Options do
+  alias Kconnectex.CLI.Configuration
+
   defstruct url: :no_configuration,
-            cluster: :no_configuration,
             help?: false,
             command: [],
             config: :no_configuration,
@@ -8,29 +9,54 @@ defmodule Kconnectex.CLI.Options do
 
   @default_port 8083
 
-  def parse(args) do
+  def extract(args) do
+    case Configuration.load() do
+      {:ok, config} ->
+        parse(args, config)
+
+      otherwise ->
+        otherwise
+    end
+  end
+
+  def parse(args, config \\ %{}) do
     flags = [url: :string, help: :boolean, cluster: :string]
     {parsed, command, invalid} = OptionParser.parse(args, strict: flags)
 
     %__MODULE__{}
     |> set_help(Keyword.get(parsed, :help, false))
     |> with_command(command)
-    |> set_cluster(Keyword.get(parsed, :url), Keyword.get(parsed, :cluster))
+    |> set_cluster(
+      Keyword.get(parsed, :url, :no_url),
+      Keyword.get(parsed, :cluster, :no_cluster),
+      config
+    )
     |> add_errors(invalid)
   end
 
-  def update(%{cluster: cluster} = opts, {:ok, config}) do
-    case select_cluster(cluster, config) do
-      {:ok, :use_url} ->
-        opts
+  defp set_help(opts, help), do: %{opts | help?: help}
 
+  defp set_cluster(options, url, cluster, config)
+
+  defp set_cluster(%{help?: true} = opts, :no_url, :no_cluster, _config), do: opts
+
+  defp set_cluster(%{command: ["config" | _]} = opts, :no_url, :no_cluster, _config), do: opts
+
+  defp set_cluster(opts, url, cluster, _config) when url != :no_url and cluster != :no_cluster do
+    %{opts | errors: ["Do not specify both --cluster and --url" | opts.errors]}
+  end
+
+  defp set_cluster(opts, url, cluster, config) do
+    case select_cluster(cluster, config) do
       {:ok, host, port} ->
-        %{
-          opts
-          | url: "#{host}:#{port}",
-            errors: Enum.reject(opts.errors, &String.contains?(&1, "--url")),
-            config: config
-        }
+        %{opts | url: "#{host}:#{port}"}
+
+      {:ok, :use_url} ->
+        if url == :no_url do
+          %{opts | errors: ["--url is required" | opts.errors]}
+        else
+          %{opts | url: url}
+        end
 
       {:error, :invalid_cluster, bad_cluster} ->
         %{opts | errors: ["Cluster #{bad_cluster} was not found in the configuration"]}
@@ -40,11 +66,24 @@ defmodule Kconnectex.CLI.Options do
     end
   end
 
-  def update(opts, _) do
-    opts
+  defp add_errors(opts, invalid) do
+    messages =
+      invalid
+      |> Enum.map(&elem(&1, 0))
+      |> Enum.map(fn opt -> "#{opt} is not valid" end)
+
+    %{opts | errors: messages ++ opts.errors}
   end
 
-  defp select_cluster(:no_configuration, config) do
+  defp with_command(opts, []) do
+    %{opts | help?: true}
+  end
+
+  defp with_command(opts, command) do
+    %{opts | command: command}
+  end
+
+  defp select_cluster(:no_cluster, config) do
     use_selected_cluster(config)
   end
 
@@ -72,36 +111,5 @@ defmodule Kconnectex.CLI.Options do
       true ->
         {:ok, :use_url}
     end
-  end
-
-  defp set_help(opts, help), do: %{opts | help?: help}
-
-  defp set_cluster(%{help?: true} = opts, nil, nil), do: opts
-
-  defp set_cluster(%{command: ["config" | _]} = opts, nil, nil), do: opts
-
-  defp set_cluster(opts, nil, nil) do
-    %{opts | errors: ["--url is required" | opts.errors]}
-  end
-
-  defp set_cluster(opts, url, _) when not is_nil(url), do: %{opts | url: url}
-
-  defp set_cluster(opts, nil, cluster) when not is_nil(cluster), do: %{opts | cluster: cluster}
-
-  defp add_errors(opts, invalid) do
-    messages =
-      invalid
-      |> Enum.map(&elem(&1, 0))
-      |> Enum.map(fn opt -> "#{opt} is not valid" end)
-
-    %{opts | errors: messages ++ opts.errors}
-  end
-
-  defp with_command(opts, []) do
-    %{opts | help?: true}
-  end
-
-  defp with_command(opts, command) do
-    %{opts | command: command}
   end
 end

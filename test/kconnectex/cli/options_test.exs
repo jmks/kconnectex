@@ -3,55 +3,40 @@ defmodule Kconnectex.CLI.OptionsTest do
 
   alias Kconnectex.CLI.Options
 
-  test "usage" do
-    opts = Options.parse(["--help"])
+  describe "parse" do
+    test "help" do
+      opts = Options.parse(["--help"])
 
-    assert opts.help?
-  end
+      assert opts.help?
+    end
 
-  test "--url or --cluster required" do
-    opts = Options.parse(["connectors"])
+    test "--url or --cluster required" do
+      opts = Options.parse(["connectors"])
 
-    assert "--url is required" in opts.errors
-  end
+      assert "--url is required" in opts.errors
+    end
 
-  test "--cluster" do
-    opts = Options.parse(["--cluster", "apple"])
+    test "unexpected options are errors" do
+      opts = Options.parse(["--unexpected"])
 
-    assert opts.cluster == "apple"
-  end
+      assert "--unexpected is not valid" in opts.errors
+    end
 
-  test "--url prefered over --cluster" do
-    opts = Options.parse(["--cluster", "apple", "--url", "example.com"])
+    test "no command defaults to help" do
+      opts = Options.parse([])
 
-    assert opts.url == "example.com"
-    assert opts.cluster == :no_configuration
-  end
+      assert opts.help?
+    end
 
-  test "unexpected options are errors" do
-    opts = Options.parse(["--unexpected"])
+    test "a valid command" do
+      opts = Options.parse(["--url", "example.com", "cluster", "info"])
 
-    assert "--unexpected is not valid" in opts.errors
-  end
+      assert opts.url == "example.com"
+      assert opts.command == ["cluster", "info"]
+      assert opts.errors == []
+    end
 
-  test "no command defaults to help" do
-    opts = Options.parse([])
-
-    assert opts.help?
-  end
-
-  test "a valid command" do
-    opts = Options.parse(["--url", "example.com", "cluster", "info"])
-
-    assert opts.url == "example.com"
-    assert opts.command == ["cluster", "info"]
-    assert opts.errors == []
-  end
-
-  describe "update" do
-    test "use selected cluster if configured" do
-      opts = %Options{url: nil, errors: ["--url is required"]}
-
+    test "use cluster from configuration" do
       config = %{
         "global" => %{"selected_env" => "local"},
         "env" => %{
@@ -59,24 +44,10 @@ defmodule Kconnectex.CLI.OptionsTest do
         }
       }
 
-      assert %{url: "localhost:9999", errors: []} = Options.update(opts, {:ok, config})
+      assert %{url: "localhost:9999", errors: []} = Options.parse(["cluster"], config)
     end
 
-    test "use --cluster if configured" do
-      opts = %Options{cluster: "test"}
-
-      config = %{
-        "env" => %{
-          "test" => %{"host" => "testhost", "port" => 9999}
-        }
-      }
-
-      assert %{url: "testhost:9999"} = Options.update(opts, {:ok, config})
-    end
-
-    test "uses 8083 as default port if port not configured" do
-      opts = %Options{url: nil, errors: ["--url is required"]}
-
+    test "use cluster from configuration with a default port" do
       config = %{
         "global" => %{"selected_env" => "local"},
         "env" => %{
@@ -84,34 +55,49 @@ defmodule Kconnectex.CLI.OptionsTest do
         }
       }
 
-      assert %{url: "localhost:8083", errors: []} = Options.update(opts, {:ok, config})
+      assert %{url: "localhost:8083", errors: []} = Options.parse(["cluster"], config)
     end
 
-    test "keep --url option if not configured" do
-      opts = %Options{url: "remote-host:8080"}
-      config = %{"env" => %{"local" => %{"host" => "localhost"}}}
+    test "use --cluster option" do
+      config = %{
+        "env" => %{
+          "test" => %{"host" => "testhost", "port" => 9999}
+        }
+      }
 
-      assert %{url: "remote-host:8080"} = Options.update(opts, {:ok, config})
+      assert %{url: "testhost:9999"} = Options.parse(["--cluster", "test"], config)
+    end
+
+    test "falls back to --url without --cluster nor configuration" do
+      config = %{
+        "env" => %{
+          "local" => %{"host" => "localhost"}
+        }
+      }
+
+      assert %{url: "example.com"} = Options.parse(["--url", "example.com"], config)
     end
 
     test "adds error when --cluster does not exist" do
-      opts = %Options{url: "remote:8080", cluster: "local"}
-      config = %{}
-
-      assert %{errors: ["Cluster local was not found in the configuration"]} =
-               Options.update(opts, {:ok, config})
+      assert %{errors: ["Cluster unknown was not found in the configuration"]} =
+               Options.parse(["--cluster", "unknown"], %{})
     end
 
     test "adds error when selected cluster does not exist" do
-      opts = %Options{}
-
       config = %{
         "global" => %{"selected_env" => "local"},
         "env" => %{}
       }
 
-      assert %{errors: ["Selected cluster local was not found in the configuration"]} =
-               Options.update(opts, {:ok, config})
+      options = Options.parse(["cluster"], config)
+
+      assert options.errors == ["Selected cluster local was not found in the configuration"]
+    end
+
+    test "adds error when both --cluster and --url are provided" do
+      options = Options.parse(["--cluster", "local", "--url", "example.com"])
+
+      assert options.errors == ["Do not specify both --cluster and --url"]
     end
   end
 end

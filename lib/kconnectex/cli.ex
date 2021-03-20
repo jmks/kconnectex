@@ -1,15 +1,12 @@
 defmodule Kconnectex.CLI do
-  alias Kconnectex.CLI.{Configuration, Options}
+  alias Kconnectex.CLI.Options
 
   import Kconnectex.CLI.Help
 
   @default_port 8083
 
   def main(args) do
-    opts =
-      args
-      |> Options.parse()
-      |> Options.update(Configuration.load())
+    opts = Options.extract(args)
 
     case opts.errors do
       [] ->
