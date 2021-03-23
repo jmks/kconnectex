@@ -4,8 +4,6 @@ defmodule Kconnectex.CLI.Options do
   @enforce_keys [:config]
   defstruct [:config, url: :no_configuration, help?: false, command: [], errors: []]
 
-  @default_port 8083
-
   def extract(args) do
     case Configuration.load() do
       {:ok, config} ->
@@ -45,15 +43,15 @@ defmodule Kconnectex.CLI.Options do
 
   defp set_url(opts, url, cluster) do
     case select_cluster(cluster, opts.config) do
-      {:ok, host, port} ->
-        %{opts | url: "#{host}:#{port}"}
-
       {:ok, :use_url} ->
         if url == :no_url do
           %{opts | errors: ["--url is required" | opts.errors]}
         else
           %{opts | url: url}
         end
+
+      {:ok, url} ->
+        %{opts | url: url}
 
       {:error, :invalid_cluster, bad_cluster} ->
         %{opts | errors: ["Cluster #{bad_cluster} was not found in the configuration"]}
@@ -88,7 +86,7 @@ defmodule Kconnectex.CLI.Options do
     cluster_env = get_in(config, ["env", cluster])
 
     if cluster_env do
-      {:ok, Map.fetch!(cluster_env, "host"), Map.get(cluster_env, "port", @default_port)}
+      {:ok, url(cluster_env)}
     else
       {:error, :invalid_cluster, cluster}
     end
@@ -103,10 +101,21 @@ defmodule Kconnectex.CLI.Options do
         {:error, :invalid_config, selected}
 
       selected_env ->
-        {:ok, Map.fetch!(selected_env, "host"), Map.get(selected_env, "port", @default_port)}
+        {:ok, url(selected_env)}
 
       true ->
         {:ok, :use_url}
+    end
+  end
+
+  defp url(config) do
+    host = Map.fetch!(config, "host")
+    port = Map.get(config, "port")
+
+    if port do
+      Enum.join([host, port], ":")
+    else
+      host
     end
   end
 end

@@ -47,7 +47,7 @@ defmodule Kconnectex.CLI.OptionsTest do
       assert %{url: "localhost:9999", errors: []} = Options.parse(["cluster"], config)
     end
 
-    test "use cluster from configuration with a default port" do
+    test "use cluster from configuration with no port" do
       config = %{
         "global" => %{"selected_env" => "local"},
         "env" => %{
@@ -55,7 +55,7 @@ defmodule Kconnectex.CLI.OptionsTest do
         }
       }
 
-      assert %{url: "localhost:8083", errors: []} = Options.parse(["cluster"], config)
+      assert %{url: "localhost", errors: []} = Options.parse(["cluster"], config)
     end
 
     test "use --cluster option" do
