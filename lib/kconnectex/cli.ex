@@ -3,8 +3,6 @@ defmodule Kconnectex.CLI do
 
   import Kconnectex.CLI.Help
 
-  @default_port 8083
-
   def main(args) do
     opts = Options.extract(args)
 
@@ -160,9 +158,10 @@ defmodule Kconnectex.CLI do
       Enum.each(names, fn {name, display_name} ->
         env = Map.fetch!(envs, name)
         host = Map.fetch!(env, "host")
-        port = Map.get(env, "port", @default_port)
+        port = Map.get(env, "port")
+        url = if port, do: "#{host}:#{port}", else: host
 
-        IO.puts("#{String.pad_trailing(display_name, max, " ")} #{host}:#{port}")
+        IO.puts("#{String.pad_trailing(display_name, max, " ")} #{url}")
       end)
     else
       IO.puts("No environments configured. See `config --help` for more info.")
@@ -182,9 +181,9 @@ defmodule Kconnectex.CLI do
     IO.puts(error_description([message]))
   end
 
-  defp display({:error, errors}) do
+  defp display({:error, message}) do
     IO.puts("Error with request:")
-    IO.puts(error_description(errors))
+    IO.puts(error_description(message))
   end
 
   defp error_description(:econnrefused), do: "  Connection to server failed"
@@ -193,8 +192,8 @@ defmodule Kconnectex.CLI do
 
   defp error_description(:rebalancing), do: "  Connect is rebalancing. Try again later."
 
-  defp error_description(errors) when is_list(errors) do
-    errors
+  defp error_description(messages) when is_list(messages) do
+    messages
     |> Enum.map(&"  #{&1}")
     |> Enum.join("\n")
   end
