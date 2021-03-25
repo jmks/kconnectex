@@ -142,12 +142,12 @@ defmodule Kconnectex.CLI do
   end
 
   defp display_config(config) do
-    selected = get_in(config, ["global", "selected_env"])
-    envs = get_in(config, ["env"]) || %{}
+    selected = config["selected_cluster"]
+    clusters = config["clusters"] || %{}
 
-    if map_size(envs) > 0 do
+    if map_size(clusters) > 0 do
       names =
-        Enum.map(Map.keys(envs), fn name ->
+        Enum.map(Map.keys(clusters), fn name ->
           display_name = if name == selected, do: "*#{name}", else: name
 
           {name, display_name}
@@ -156,9 +156,9 @@ defmodule Kconnectex.CLI do
       max = Enum.map(names, fn {_, name} -> String.length(name) end) |> Enum.max()
 
       Enum.each(names, fn {name, display_name} ->
-        env = Map.fetch!(envs, name)
-        host = Map.fetch!(env, "host")
-        port = Map.get(env, "port")
+        cluster = Map.fetch!(clusters, name)
+        host = Map.fetch!(cluster, "host")
+        port = Map.get(cluster, "port")
         url = if port, do: "#{host}:#{port}", else: host
 
         IO.puts("#{String.pad_trailing(display_name, max, " ")} #{url}")
