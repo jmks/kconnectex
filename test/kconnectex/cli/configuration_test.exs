@@ -4,38 +4,40 @@ defmodule Kconnectex.CLI.ConfigurationTest do
   alias Kconnectex.CLI.Configuration
 
   test "example is valid" do
-    assert {:ok, _} = Configuration.load(".kconnectex.toml.example")
+    assert {:ok, _} = Configuration.load(".kconnectex.json.example")
   end
 
-  test "selected_env must be present" do
-    assert {:error, reason} = Configuration.load(fixture("missing_selected_env.toml"))
+  test "selected_cluster must match a cluster" do
+    assert {:error, reason} = Configuration.load(fixture("missing_selected_cluster.json"))
 
     assert String.contains?(
              Configuration.format_error(reason),
-             "oranges does not exist as table [env.oranges]"
+             "selected cluster test does not exist"
            )
   end
 
   describe "configuration validation" do
     test "host is required" do
       assert {:error, reason} =
-               Configuration.validate_config(%{"env" => %{"local" => %{"port" => 8083}}})
+               Configuration.validate_config(%{"clusters" => %{"local" => %{"port" => 8083}}})
 
       assert Configuration.format_error(reason) == "host is required"
 
       assert {:error, reason} =
-               Configuration.validate_config(%{"env" => %{"local" => %{"host" => 8083}}})
+               Configuration.validate_config(%{"clusters" => %{"local" => %{"host" => 8083}}})
 
       assert Configuration.format_error(reason) == "host must be a string"
 
       assert {:ok, _} =
-               Configuration.validate_config(%{"env" => %{"local" => %{"host" => "localhost"}}})
+               Configuration.validate_config(%{
+                 "clusters" => %{"local" => %{"host" => "localhost"}}
+               })
     end
 
     test "port must be an integer if present" do
       assert {:error, reason} =
                Configuration.validate_config(%{
-                 "env" => %{"local" => %{"host" => "localhost", "port" => "8080"}}
+                 "clusters" => %{"local" => %{"host" => "localhost", "port" => "8080"}}
                })
 
       assert Configuration.format_error(reason) == "port must be an integer"

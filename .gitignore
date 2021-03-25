@@ -26,6 +26,6 @@ kconnectex-*.tar
 /kconnectex
 
 # Ignore local config file
-.kconnectex.toml
+.kconnectex.json
 
 mix.lock

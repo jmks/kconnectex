@@ -1,10 +1,11 @@
 defmodule Kconnectex.CLI.Configuration do
-  @config_filename ".kconnectex.toml"
+  @config_filename ".kconnectex.json"
 
   def load(filepath \\ :use_home_or_local) do
     with {:ok, file} <- config_file(filepath),
-         {:ok, config} <- Toml.decode_file(file),
-         {:ok, config} <- validate_config(config) do
+         {:ok, contents} <- File.read(file),
+         {:ok, json} <- Jason.decode(contents),
+         {:ok, config} <- validate_config(json) do
       {:ok, config}
     else
       {:error, reason} ->
@@ -13,8 +14,8 @@ defmodule Kconnectex.CLI.Configuration do
   end
 
   def validate_config(config) do
-    with :ok <- validate_global_config(config),
-         :ok <- validate_envs(config) do
+    with :ok <- validate_app_settings(config),
+         :ok <- validate_clusters(config) do
       {:ok, config}
     else
       {:error, error} ->
@@ -34,8 +35,8 @@ defmodule Kconnectex.CLI.Configuration do
     Enum.join(parts, "\n")
   end
 
-  def format_error({:missing_environment, env}) do
-    "Selected environment #{env} does not exist as table [env.#{env}]. Add the table or change the selected_env."
+  def format_error({:missing_cluster, cluster}) do
+    "selected cluster #{cluster} does not exist under key 'clusters'"
   end
 
   def format_error(:missing_host), do: "host is required"
@@ -43,6 +44,8 @@ defmodule Kconnectex.CLI.Configuration do
   def format_error(:nonbinary_host), do: "host must be a string"
 
   def format_error(:noninteger_port), do: "port must be an integer"
+
+  def format_error(:enoent), do: "file not found"
 
   defp config_file(:use_home_or_local) do
     files = Enum.filter(default_files(), &File.exists?/1)
@@ -62,37 +65,37 @@ defmodule Kconnectex.CLI.Configuration do
     |> Enum.map(fn dir -> Path.join([dir, @config_filename]) end)
   end
 
-  defp validate_global_config(%{"global" => %{"selected_env" => env}, "env" => envs}) do
-    if Map.has_key?(envs, env) do
+  defp validate_app_settings(%{"selected_cluster" => cluster, "clusters" => clusters}) do
+    if Map.has_key?(clusters, cluster) do
       :ok
     else
-      {:error, {:missing_environment, env}}
+      {:error, {:missing_cluster, cluster}}
     end
   end
 
-  defp validate_global_config(_), do: :ok
+  defp validate_app_settings(_), do: :ok
 
-  defp validate_envs(%{"env" => envs}) do
-    envs
+  defp validate_clusters(%{"clusters" => clusters}) do
+    clusters
     |> Map.values()
-    |> Enum.map(&validate_env/1)
+    |> Enum.map(&validate_cluster/1)
     |> Enum.find(:ok, fn
       {:error, _} -> true
       :ok -> false
     end)
   end
 
-  defp validate_envs(_), do: :ok
+  defp validate_clusters(_), do: :ok
 
-  defp validate_env(env) do
+  defp validate_cluster(cluster) do
     cond do
-      not Map.has_key?(env, "host") ->
+      not Map.has_key?(cluster, "host") ->
         {:error, :missing_host}
 
-      not is_binary(env["host"]) ->
+      not is_binary(cluster["host"]) ->
         {:error, :nonbinary_host}
 
-      Map.has_key?(env, "port") and not is_integer(env["port"]) ->
+      Map.has_key?(cluster, "port") and not is_integer(cluster["port"]) ->
         {:error, :noninteger_port}
 
       true ->
