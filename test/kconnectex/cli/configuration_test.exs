@@ -21,12 +21,12 @@ defmodule Kconnectex.CLI.ConfigurationTest do
       assert {:error, reason} =
                Configuration.validate_config(%{"clusters" => %{"local" => %{"port" => 8083}}})
 
-      assert Configuration.format_error(reason) == "host is required"
+      assert Configuration.format_error(reason) == "cluster local must specify a host"
 
       assert {:error, reason} =
                Configuration.validate_config(%{"clusters" => %{"local" => %{"host" => 8083}}})
 
-      assert Configuration.format_error(reason) == "host must be a string"
+      assert Configuration.format_error(reason) == "cluster local host must be a string"
 
       assert {:ok, _} =
                Configuration.validate_config(%{
@@ -40,7 +40,7 @@ defmodule Kconnectex.CLI.ConfigurationTest do
                  "clusters" => %{"local" => %{"host" => "localhost", "port" => "8080"}}
                })
 
-      assert Configuration.format_error(reason) == "port must be an integer"
+      assert Configuration.format_error(reason) == "cluster local port must be an integer"
     end
   end
 

@@ -39,11 +39,17 @@ defmodule Kconnectex.CLI.Configuration do
     "selected cluster #{cluster} does not exist under key 'clusters'"
   end
 
-  def format_error(:missing_host), do: "host is required"
+  def format_error({:missing_host, cluster}) do
+    "cluster #{cluster} must specify a host"
+  end
 
-  def format_error(:nonbinary_host), do: "host must be a string"
+  def format_error({:nonbinary_host, cluster}) do
+    "cluster #{cluster} host must be a string"
+  end
 
-  def format_error(:noninteger_port), do: "port must be an integer"
+  def format_error({:noninteger_port, cluster}) do
+    "cluster #{cluster} port must be an integer"
+  end
 
   def format_error(:enoent), do: "file not found"
 
@@ -77,7 +83,6 @@ defmodule Kconnectex.CLI.Configuration do
 
   defp validate_clusters(%{"clusters" => clusters}) do
     clusters
-    |> Map.values()
     |> Enum.map(&validate_cluster/1)
     |> Enum.find(:ok, fn
       {:error, _} -> true
@@ -87,16 +92,16 @@ defmodule Kconnectex.CLI.Configuration do
 
   defp validate_clusters(_), do: :ok
 
-  defp validate_cluster(cluster) do
+  defp validate_cluster({cluster, data}) do
     cond do
-      not Map.has_key?(cluster, "host") ->
-        {:error, :missing_host}
+      not Map.has_key?(data, "host") ->
+        {:error, {:missing_host, cluster}}
 
-      not is_binary(cluster["host"]) ->
-        {:error, :nonbinary_host}
+      not is_binary(data["host"]) ->
+        {:error, {:nonbinary_host, cluster}}
 
-      Map.has_key?(cluster, "port") and not is_integer(cluster["port"]) ->
-        {:error, :noninteger_port}
+      Map.has_key?(data, "port") and not is_integer(data["port"]) ->
+        {:error, {:noninteger_port, cluster}}
 
       true ->
         :ok
