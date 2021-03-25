@@ -40,6 +40,9 @@ defmodule Kconnectex.CLI.Help do
 
     config
       Display current configuration
+
+    config select NAME
+      Select NAME as the default cluster.
     """)
   end
 

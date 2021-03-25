@@ -1,5 +1,5 @@
 defmodule Kconnectex.CLI do
-  alias Kconnectex.CLI.Options
+  alias Kconnectex.CLI.{Configuration, Options}
 
   import Kconnectex.CLI.Help
 
@@ -33,6 +33,29 @@ defmodule Kconnectex.CLI do
 
   defp run(%{command: ["config"]} = opts) do
     display_config(opts.config)
+  end
+
+  defp run(%{command: ["config", "select", selected]} = opts) do
+    case opts.config do
+      :no_configuration_file ->
+        IO.puts("No configuration file found.")
+
+      config ->
+        if get_in(config, ["clusters", selected]) do
+          config
+          |> Map.put("selected_cluster", selected)
+          |> Configuration.write()
+          |> display()
+        else
+          cluster_choices =
+            config["clusters"]
+            |> Map.keys()
+            |> Enum.join(", ")
+
+          IO.puts("Cluster #{selected} not found in configuration")
+          IO.puts("Found clusters: #{cluster_choices}")
+        end
+    end
   end
 
   defp run(%{command: ["cluster"], url: url}) do

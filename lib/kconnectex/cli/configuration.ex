@@ -23,6 +23,18 @@ defmodule Kconnectex.CLI.Configuration do
     end
   end
 
+  def write(config, filepath \\ :use_home_or_local) do
+    with {:ok, json} <- Jason.encode(config, pretty: true),
+         {:ok, file} <- config_file(filepath),
+         {:ok, io} <- File.open(file, [:write]),
+         :ok <- IO.write(io, json) do
+      :ok
+    else
+      {:error, error} ->
+        {:error, error}
+    end
+  end
+
   def format_error(reason)
 
   def format_error(:no_configuration_file) do
