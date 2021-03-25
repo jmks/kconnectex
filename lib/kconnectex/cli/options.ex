@@ -57,7 +57,7 @@ defmodule Kconnectex.CLI.Options do
         %{opts | errors: ["Cluster #{bad_cluster} was not found in the configuration"]}
 
       {:error, :invalid_config, bad_cluster} ->
-        %{opts | errors: ["Selected cluster #{bad_cluster} was not found in the configuration"]}
+        %{opts | errors: ["selected cluster #{bad_cluster} was not found in the configuration"]}
     end
   end
 
@@ -83,25 +83,25 @@ defmodule Kconnectex.CLI.Options do
   end
 
   defp select_cluster(cluster, config) do
-    cluster_env = get_in(config, ["env", cluster])
+    cluster_config = get_in(config, ["clusters", cluster])
 
-    if cluster_env do
-      {:ok, url(cluster_env)}
+    if cluster_config do
+      {:ok, url(cluster_config)}
     else
       {:error, :invalid_cluster, cluster}
     end
   end
 
   defp use_selected_cluster(config) do
-    selected = get_in(config, ["global", "selected_env"])
-    selected_env = get_in(config, ["env", selected])
+    selected = config["selected_cluster"]
+    cluster_config = get_in(config, ["clusters", selected])
 
     cond do
-      selected && is_nil(selected_env) ->
+      selected && is_nil(cluster_config) ->
         {:error, :invalid_config, selected}
 
-      selected_env ->
-        {:ok, url(selected_env)}
+      cluster_config ->
+        {:ok, url(cluster_config)}
 
       true ->
         {:ok, :use_url}

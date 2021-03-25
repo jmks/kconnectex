@@ -38,8 +38,8 @@ defmodule Kconnectex.CLI.OptionsTest do
 
     test "use cluster from configuration" do
       config = %{
-        "global" => %{"selected_env" => "local"},
-        "env" => %{
+        "selected_cluster" => "local",
+        "clusters" => %{
           "local" => %{"host" => "localhost", "port" => 9999}
         }
       }
@@ -49,8 +49,8 @@ defmodule Kconnectex.CLI.OptionsTest do
 
     test "use cluster from configuration with no port" do
       config = %{
-        "global" => %{"selected_env" => "local"},
-        "env" => %{
+        "selected_cluster" => "local",
+        "clusters" => %{
           "local" => %{"host" => "localhost"}
         }
       }
@@ -60,7 +60,7 @@ defmodule Kconnectex.CLI.OptionsTest do
 
     test "use --cluster option" do
       config = %{
-        "env" => %{
+        "clusters" => %{
           "test" => %{"host" => "testhost", "port" => 9999}
         }
       }
@@ -70,7 +70,7 @@ defmodule Kconnectex.CLI.OptionsTest do
 
     test "falls back to --url without --cluster nor configuration" do
       config = %{
-        "env" => %{
+        "clusters" => %{
           "local" => %{"host" => "localhost"}
         }
       }
@@ -85,13 +85,13 @@ defmodule Kconnectex.CLI.OptionsTest do
 
     test "adds error when selected cluster does not exist" do
       config = %{
-        "global" => %{"selected_env" => "local"},
-        "env" => %{}
+        "selected_cluster" => "local",
+        "clusters" => %{}
       }
 
       options = Options.parse(["cluster"], config)
 
-      assert options.errors == ["Selected cluster local was not found in the configuration"]
+      assert options.errors == ["selected cluster local was not found in the configuration"]
     end
 
     test "adds error when both --cluster and --url are provided" do
