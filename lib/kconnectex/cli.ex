@@ -35,6 +35,14 @@ defmodule Kconnectex.CLI do
     display_config(opts.config)
   end
 
+  defp run(%{command: ["config", "add", name, host, port]} = opts) do
+    add_cluster(opts.config, name, host, port)
+  end
+
+  defp run(%{command: ["config", "add", name, host]} = opts) do
+    add_cluster(opts.config, name, host)
+  end
+
   defp run(%{command: ["config", "select", selected]} = opts) do
     case opts.config do
       :no_configuration_file ->
@@ -191,6 +199,39 @@ defmodule Kconnectex.CLI do
     end
   end
 
+  defp add_cluster(config, name, host, port \\ nil)
+
+  defp add_cluster(:no_configuration_file, _name, _host, _port) do
+    # TODO: create the file?
+    IO.puts("No configuration file found.")
+  end
+
+  defp add_cluster(config, name, host, port) do
+    cluster_config = extract_cluster_config(host, port)
+    new_config = put_in(config["clusters"][name], cluster_config)
+
+    case Configuration.write(new_config) do
+      :ok ->
+        display(:ok)
+
+      {:error, reason} ->
+        message = Configuration.format_error(reason)
+        display({:error, message})
+    end
+  end
+
+  defp extract_cluster_config(host, nil), do: %{"host" => host}
+
+  defp extract_cluster_config(host, port) do
+    case Integer.parse(port) do
+      {port, ""} ->
+        %{"host" => host, "port" => port}
+
+      :error ->
+        %{"host" => host, "port" => port}
+    end
+  end
+
   defp display(:ok), do: IO.puts("Success")
 
   defp display({:ok, result}) do
@@ -207,6 +248,10 @@ defmodule Kconnectex.CLI do
   defp display({:error, message}) do
     IO.puts("Error with request:")
     IO.puts(error_description(message))
+  end
+
+  defp error_description(message) when is_binary(message) do
+    "  #{message}"
   end
 
   defp error_description(:econnrefused), do: "  Connection to server failed"

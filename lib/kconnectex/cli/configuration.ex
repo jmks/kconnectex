@@ -24,10 +24,12 @@ defmodule Kconnectex.CLI.Configuration do
   end
 
   def write(config, filepath \\ :use_home_or_local) do
-    with {:ok, json} <- Jason.encode(config, pretty: true),
+    with {:ok, validated} <- validate_config(config),
+         {:ok, json} <- Jason.encode(validated, pretty: true),
          {:ok, file} <- config_file(filepath),
          {:ok, io} <- File.open(file, [:write]),
-         :ok <- IO.write(io, json) do
+         :ok <- IO.write(io, json),
+         :ok <- File.close(io) do
       :ok
     else
       {:error, error} ->
