@@ -73,8 +73,16 @@ defmodule Kconnectex.CLI do
 
       config ->
         if get_in(config, ["clusters", name]) do
-          pop_in(config, ["clusters", name])
-          |> elem(1)
+          new_config = pop_in(config, ["clusters", name]) |> elem(1)
+
+          new_config =
+            if new_config["selected_cluster"] do
+              Map.delete(new_config, "selected_cluster")
+            else
+              new_config
+            end
+
+          new_config
           |> Configuration.write()
           |> display()
         else
