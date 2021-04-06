@@ -1,8 +1,11 @@
 defmodule Kconnectex.CLI do
+  use Bakeware.Script
+
   alias Kconnectex.CLI.{Configuration, Options}
 
   import Kconnectex.CLI.Help
 
+  @impl Bakeware.Script
   def main(args) do
     opts = Options.extract(args)
 
