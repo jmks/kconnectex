@@ -66,6 +66,23 @@ defmodule Kconnectex.CLI do
     end
   end
 
+  defp run(%{command: ["config", "remove", name]} = opts) do
+    case opts.config do
+      :no_configuration_file ->
+        display(:ok)
+
+      config ->
+        if get_in(config, ["clusters", name]) do
+          pop_in(config, ["clusters", name])
+          |> elem(1)
+          |> Configuration.write()
+          |> display()
+        else
+          display(:ok)
+        end
+    end
+  end
+
   defp run(%{command: ["cluster"], url: url}) do
     client(url)
     |> Kconnectex.Cluster.info()

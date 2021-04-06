@@ -41,13 +41,16 @@ defmodule Kconnectex.CLI.Help do
     config
       Display current configuration
 
-    config select NAME
-      Select NAME as the default cluster.
-
     config add NAME HOST PORT
       Add (or update) a cluster to the configuration file.
       NAME is the cluster name.
       PORT is optional.
+
+    config remove NAME
+      Remove configuration for cluster NAME.
+
+    config select NAME
+      Select NAME as the default cluster.
     """)
   end
 
