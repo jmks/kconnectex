@@ -10,6 +10,7 @@ defmodule Kconnectex.MixProject do
       deps: deps(),
       releases: [
         script: [
+          include_executables_for: [:unix],
           steps: [:assemble, &Bakeware.assemble/1]
         ]
       ]
