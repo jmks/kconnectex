@@ -6,12 +6,12 @@ Currently under development.
 
 ## CLI
 
-This library includes an escript. It is inspired by [kaf](https://github.com/birdayz/kaf) for Kafka.
+It is inspired by [kaf](https://github.com/birdayz/kaf) for Kafka.
 
-Build it and display the help:
+This library can be [baked into an executable](https://github.com/bake-bake-bake/bakeware):
 
 ```
-$ mix escript.build
+$ mix bake
 $ ./kconnectex --help
 ```
 
