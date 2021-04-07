@@ -33,17 +33,12 @@ $ ./kconnectex --help
 * reset
 
 ### CLI
-* strictly output JSON?
+* restore `iex -S mix` functionality
+* fix exit statuses?
+* run via docker
+* Make errors uniform - error type?
 * `completion` command to generate script for bash, zsh
-* Run via docker
-* github.com/bake-bake-bake/bakeware
-
-#### config
-
-* Find a way to write TOML without writing an encoder.
-* add
-* select
-* remove
+* strictly output JSON (possible?)
 
 ## Development
 
