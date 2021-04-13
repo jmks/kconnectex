@@ -29,3 +29,6 @@ kconnectex-*.tar
 .kconnectex.json
 
 mix.lock
+
+# Emacs things
+.dir-locals.el
