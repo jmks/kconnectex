@@ -14,6 +14,18 @@ defmodule Helpers do
 
     Enum.map(connectors, &Kconnectex.Connectors.delete(client, &1))
   end
+
+  def statuses(client) do
+    {:ok, connectors} = Kconnectex.Connectors.list(client)
+
+    Enum.each(connectors, fn conn ->
+      IO.puts(String.duplicate("=", String.length(conn)))
+      IO.puts(conn)
+      String.duplicate("=", String.length(conn))
+      {:ok, status} = Connectors.status(client, conn)
+      IO.inspect(status)
+    end)
+  end
 end
 
 client = Kconnectex.client("http://0.0.0.0:8083")
