@@ -298,7 +298,7 @@ defmodule Kconnectex.CLI do
     IO.puts("Here are some errors that need to be resolved:")
     Enum.each(errors, &IO.puts/1)
     IO.puts("")
-    IO.puts("Run with the `--help` for more details")
+    IO.puts("Run `#{:escript.script_name()} --help` for usage")
   end
 
   defp unknown_command(opts) do
