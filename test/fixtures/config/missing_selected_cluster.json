@@ -1,0 +1,9 @@
+{
+    "selected_cluster":"test",
+    "clusters":{
+        "local": {
+            "host":"localhost",
+            "port":8083
+        }
+    }
+}
