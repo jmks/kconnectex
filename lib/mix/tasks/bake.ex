@@ -8,6 +8,6 @@ defmodule Mix.Tasks.Bake do
     end
 
     Mix.Shell.cmd("MIX_ENV=prod mix release script --overwrite", &IO.puts/1)
-    Mix.Shell.cmd("cp _build/prod/rel/bakeware/script ./kconnectex", &IO.puts/1)
+    Mix.Shell.cmd("mv _build/prod/rel/bakeware/script ./kconnectex", &IO.puts/1)
   end
 end
