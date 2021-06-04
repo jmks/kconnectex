@@ -281,6 +281,8 @@ defmodule Kconnectex.CLI do
 
   defp error_description(:econnrefused), do: "  Connection to server failed"
 
+  defp error_description(:timeout), do: "  Timed out connecting to server"
+
   defp error_description(:not_found), do: "  Not found"
 
   defp error_description(:rebalancing), do: "  Connect is rebalancing. Try again later."
