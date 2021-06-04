@@ -4,7 +4,16 @@ Elixir API wrapper for the [Kafka Connect API](https://docs.confluent.io/platfor
 
 Currently under development.
 
-If you are looking for a cli, check out [kconnectex_cli](https://github.com/jmks/kconnectex_cli).
+## CLI
+
+It is inspired by [kaf](https://github.com/birdayz/kaf) for Kafka.
+
+This library can be [baked into an executable](https://github.com/bake-bake-bake/bakeware):
+
+```
+$ mix bake
+$ ./kconnectex --help
+```
 
 ## TODO
 
@@ -22,6 +31,14 @@ If you are looking for a cli, check out [kconnectex_cli](https://github.com/jmks
 ### Topics
 * get
 * reset
+
+### CLI
+* restore `iex -S mix` functionality
+* fix exit statuses?
+* run via docker
+* Make errors uniform - error type?
+* `completion` command to generate script for bash, zsh
+* strictly output JSON (possible?)
 
 ## Development
 
