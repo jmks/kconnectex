@@ -27,37 +27,41 @@ defmodule Kconnectex.CLI.Options do
       config: config
     }
     |> with_command(command)
-    |> set_url(Keyword.get(parsed, :url, :no_url), Keyword.get(parsed, :cluster, :no_cluster))
+    |> set_url(Keyword.get(parsed, :url), Keyword.get(parsed, :cluster))
     |> invalid_flag_errors(invalid)
   end
 
   defp set_url(options, url, cluster)
 
-  defp set_url(%{help?: true} = opts, :no_url, :no_cluster), do: opts
+  defp set_url(%{help?: true} = opts, _url, _cluster), do: opts
 
-  defp set_url(%{command: ["config" | _]} = opts, :no_url, :no_cluster), do: opts
+  defp set_url(%{command: ["config" | _]} = opts, _url, _cluster), do: opts
 
-  defp set_url(opts, url, cluster) when url != :no_url and cluster != :no_cluster do
-    %{opts | errors: ["Do not specify both --cluster and --url" | opts.errors]}
+  defp set_url(opts, url, _cluster) when is_binary(url) do
+    %{opts | url: url}
   end
 
-  defp set_url(opts, url, cluster) do
-    case select_cluster(cluster, opts.config) do
-      {:ok, :use_url} ->
-        if url == :no_url do
-          %{opts | errors: ["--url is required" | opts.errors]}
-        else
-          %{opts | url: url}
-        end
+  defp set_url(opts, _url, cluster) when not is_nil(cluster) do
+    cluster_config = get_in(opts.config, ["clusters", cluster])
 
-      {:ok, url} ->
-        %{opts | url: url}
+    if cluster_config do
+      %{opts | url: url(cluster_config)}
+    else
+      %{opts | errors: ["Cluster #{cluster} was not found in the configuration"]}
+    end
+  end
 
-      {:error, :invalid_cluster, bad_cluster} ->
-        %{opts | errors: ["Cluster #{bad_cluster} was not found in the configuration"]}
+  defp set_url(opts, _url, _cluster) do
+    selected = opts.config["selected_cluster"]
+    cluster_config = get_in(opts.config, ["clusters", selected])
 
-      {:error, :invalid_config, bad_cluster} ->
-        %{opts | errors: ["selected cluster #{bad_cluster} was not found in the configuration"]}
+    cond do
+      selected && is_nil(cluster_config) ->
+        %{opts | errors: ["selected cluster #{selected} was not found in the configuration"]}
+      cluster_config ->
+        %{opts | url: url(cluster_config)}
+      true ->
+        %{opts | errors: ["--url is required" | opts.errors]}
     end
   end
 
@@ -76,36 +80,6 @@ defmodule Kconnectex.CLI.Options do
 
   defp with_command(opts, command) do
     %{opts | command: command}
-  end
-
-  defp select_cluster(:no_cluster, config) do
-    use_selected_cluster(config)
-  end
-
-  defp select_cluster(cluster, config) do
-    cluster_config = get_in(config, ["clusters", cluster])
-
-    if cluster_config do
-      {:ok, url(cluster_config)}
-    else
-      {:error, :invalid_cluster, cluster}
-    end
-  end
-
-  defp use_selected_cluster(config) do
-    selected = config["selected_cluster"]
-    cluster_config = get_in(config, ["clusters", selected])
-
-    cond do
-      selected && is_nil(cluster_config) ->
-        {:error, :invalid_config, selected}
-
-      cluster_config ->
-        {:ok, url(cluster_config)}
-
-      true ->
-        {:ok, :use_url}
-    end
   end
 
   defp url(config) do
