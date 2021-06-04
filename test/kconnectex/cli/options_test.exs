@@ -94,7 +94,7 @@ defmodule Kconnectex.CLI.OptionsTest do
       assert options.errors == ["selected cluster local was not found in the configuration"]
     end
 
-    test "adds error when both --cluster and --url are provided" do
+    test "can not provide both --cluster and --url" do
       options = Options.parse(["--cluster", "local", "--url", "example.com"])
 
       assert options.errors == ["Do not specify both --cluster and --url"]

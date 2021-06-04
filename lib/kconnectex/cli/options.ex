@@ -19,7 +19,7 @@ defmodule Kconnectex.CLI.Options do
   end
 
   def parse(args, config \\ %{}) do
-    flags = [url: :string, help: :boolean, cluster: :string]
+    flags = [cluster: :string, help: :boolean, url: :string]
     {parsed, command, invalid} = OptionParser.parse(args, strict: flags)
 
     %__MODULE__{
@@ -28,7 +28,7 @@ defmodule Kconnectex.CLI.Options do
     }
     |> with_command(command)
     |> set_url(Keyword.get(parsed, :url, :no_url), Keyword.get(parsed, :cluster, :no_cluster))
-    |> add_errors(invalid)
+    |> invalid_flag_errors(invalid)
   end
 
   defp set_url(options, url, cluster)
@@ -61,7 +61,7 @@ defmodule Kconnectex.CLI.Options do
     end
   end
 
-  defp add_errors(opts, invalid) do
+  defp invalid_flag_errors(opts, invalid) do
     messages =
       invalid
       |> Enum.map(&elem(&1, 0))
