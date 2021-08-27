@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -x
+
+tag=$(cat mix.exs | grep "version:" | cut -d\" -f2)
+
+docker build -t quay.io/jmks/kconnectex:${tag} .
+
+docker push quay.io/jmks/kconnectex:${tag}

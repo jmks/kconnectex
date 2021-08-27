@@ -55,6 +55,17 @@ $ docker-compose up
 $ mix test --include integration
 ```
 
+## Docker image
+
+A docker image is provided and is hosted at [quay](https://www.quay.io).
+You can rename `kconnectex_docker_wrapper` locally to execute it in Docker.
+
+### Release
+
+You permission to push to the Docker repository (currently, just the author).
+
+A script will release the CLI with a tag of the current version: `./release`
+
 ## Installation
 
 It's not in hex yet, but the adventurous can grab it from Github:
@@ -73,7 +84,7 @@ by adding `kconnectex` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:kconnectex, "~> 0.1.0"}
+    {:kconnectex, "~> 0.2.0"}
   ]
 end
 ```
