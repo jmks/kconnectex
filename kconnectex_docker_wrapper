@@ -4,4 +4,5 @@ exec docker run \
   --interactive --tty --rm \
   --volume ~:/home/app \
   --volume $(pwd)/:/home/app/kconnectex \
+  --network host \
   "quay.io/jmks/kconnectex:0.2.0" "$@"
