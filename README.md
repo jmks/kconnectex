@@ -4,15 +4,42 @@ Elixir API wrapper for the [Kafka Connect API](https://docs.confluent.io/platfor
 
 Currently under development.
 
-## CLI
+## How To Use
 
-This library includes an escript. It is inspired by [kaf](https://github.com/birdayz/kaf) for Kafka.
+### Use as an Elixir library
+
+```
+client = Kconnectex.client "https://domain-and-port-to-kafka-connect-cluster"
+
+{:ok, connectors} = Kconnectex.Connectors.list(client)
+```
+
+### As a CLI
+
+This app includes escript configuration. The CLI is inspired by [kaf](https://github.com/birdayz/kaf) for Kafka.
 
 Build it and display the help:
 
 ```
 $ mix escript.build
 $ ./kconnectex --help
+```
+
+### Run CLI via Docker
+
+If you don't have Elixir on your system, you can run the CLI via Docker.
+
+A docker image is provided and is hosted at [quay](https://www.quay.io).
+A wrapper is also provided (`kconnectex_docker_wrapper`) to execute it in Docker.
+
+```
+$ cp ~/path/to/repo/kconnectex_docker_wrapper /somewhere/on/system/PATH/kconnectex
+$ kconnectex cluster
+{
+  "commit": "6b2021cd52659cef",
+  "kafka_cluster_id": "dK2QBCSU",
+  "version": "2.6.1"
+}
 ```
 
 ## TODO
@@ -34,8 +61,7 @@ $ ./kconnectex --help
 
 ### CLI
 * restore `iex -S mix` functionality
-* fix exit statuses?
-* run via docker
+* fix exit statuses
 * Make errors uniform - error type?
 * `completion` command to generate script for bash, zsh
 * strictly output JSON (possible?)
@@ -54,11 +80,6 @@ To run the integration tests:
 $ docker-compose up
 $ mix test --include integration
 ```
-
-## Docker image
-
-A docker image is provided and is hosted at [quay](https://www.quay.io).
-You can rename `kconnectex_docker_wrapper` locally to execute it in Docker.
 
 ### Release
 
