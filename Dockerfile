@@ -1,4 +1,4 @@
-ARG ELIXIR_IMAGE="1.10.4-slim"
+ARG ELIXIR_IMAGE="1.12.2-slim"
 
 FROM elixir:$ELIXIR_IMAGE AS build
 
