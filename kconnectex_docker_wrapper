@@ -5,4 +5,4 @@ exec docker run \
   --volume "${HOME}/.kconnectex.json":"/home/app/.kconnectex.json" \
   --volume "$(pwd)/.kconnectex.json":"/home/app/kconnectex/.kconnectex.json" \
   --network host \
-  "quay.io/jmks/kconnectex:0.2.0" "$@"
+  "quay.io/jmks/kconnectex:0.3.0" "$@"
