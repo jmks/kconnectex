@@ -47,7 +47,15 @@ defmodule Kconnectex.CLI.Options do
     if cluster_config do
       %{opts | url: url(cluster_config)}
     else
-      %{opts | errors: ["Cluster #{cluster} was not found in the configuration"]}
+      actual_clusters = Map.keys(opts.config["clusters"])
+
+      errors = [
+        "The provided --cluster '#{cluster}' was not found in the configuration file '#{opts.config.config_file_path}'",
+        "That configuration file contains these clusters:"
+        | Enum.map(actual_clusters, fn cluster -> "  #{cluster}" end)
+      ]
+
+      %{opts | errors: errors}
     end
   end
 
