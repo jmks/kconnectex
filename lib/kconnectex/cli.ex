@@ -6,11 +6,14 @@ defmodule Kconnectex.CLI do
   def main(args) do
     opts = Options.extract(args)
 
-    case opts.errors do
-      [] ->
+    case opts do
+      {:error, reason} ->
+        display_errors([reason])
+
+      %{errors: []} ->
         run(opts)
 
-      errors ->
+      %{errors: errors} ->
         display_errors(errors)
     end
   end
