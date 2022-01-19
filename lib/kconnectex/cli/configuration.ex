@@ -6,7 +6,7 @@ defmodule Kconnectex.CLI.Configuration do
          {:ok, contents} <- File.read(file),
          {:ok, json} <- Jason.decode(contents),
          {:ok, config} <- validate_config(json) do
-      {:ok, config}
+      {:ok, Map.put(config, :config_file_path, file)}
     else
       {:error, reason} ->
         {:error, reason}
