@@ -66,8 +66,10 @@ defmodule Kconnectex.CLI.Options do
     cond do
       selected && is_nil(cluster_config) ->
         %{opts | errors: ["selected cluster #{selected} was not found in the configuration"]}
+
       cluster_config ->
         %{opts | url: url(cluster_config)}
+
       true ->
         %{opts | errors: ["--url is required" | opts.errors]}
     end

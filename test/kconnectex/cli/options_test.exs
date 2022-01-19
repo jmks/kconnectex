@@ -87,7 +87,7 @@ defmodule Kconnectex.CLI.OptionsTest do
 
     test "adds error when --cluster does not exist" do
       assert %{errors: ["Cluster unknown was not found in the configuration"]} =
-        Options.parse(["--cluster", "unknown", "cluster"], %{})
+               Options.parse(["--cluster", "unknown", "cluster"], %{})
     end
 
     test "--url is preferred over --cluster, which is preferred over configuration" do
@@ -95,13 +95,17 @@ defmodule Kconnectex.CLI.OptionsTest do
         "selected_cluster" => "local",
         "clusters" => %{
           "local" => %{"host" => "localhost"},
-          "override" => %{"host" => "localoverride"},
+          "override" => %{"host" => "localoverride"}
         }
       }
 
       assert %{url: "localhost"} = Options.parse(["cluster"], config)
-      assert %{url: "localoverride", errors: []} = Options.parse(["--cluster", "override", "cluster"], config)
-      assert %{url: "example.com"} = Options.parse(["--url", "example.com", "--cluster", "override", "cluster"], config)
+
+      assert %{url: "localoverride", errors: []} =
+               Options.parse(["--cluster", "override", "cluster"], config)
+
+      assert %{url: "example.com"} =
+               Options.parse(["--url", "example.com", "--cluster", "override", "cluster"], config)
     end
   end
 end
