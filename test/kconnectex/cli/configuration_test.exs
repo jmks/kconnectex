@@ -16,6 +16,14 @@ defmodule Kconnectex.CLI.ConfigurationTest do
            )
   end
 
+  test "return error with missing configuration file" do
+    assert {:error, :no_configuration_file} = Configuration.load(fixture("nonexistant_file.json"))
+  end
+
+  test "return error when not a file (:eisdir)" do
+    assert {:error, :no_configuration_file} = Configuration.load(fixture(""))
+  end
+
   describe "configuration validation" do
     test "host is required" do
       assert {:error, reason} =

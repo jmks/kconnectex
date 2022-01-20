@@ -3,11 +3,15 @@ defmodule Kconnectex.CLI.Configuration do
 
   def load(filepath \\ :use_home_or_local) do
     with {:ok, file} <- config_file(filepath),
+         true <- File.regular?(file),
          {:ok, contents} <- File.read(file),
          {:ok, json} <- Jason.decode(contents),
          {:ok, config} <- validate_config(json) do
       {:ok, Map.put(config, :config_file_path, file)}
     else
+      false ->
+        {:error, :no_configuration_file}
+
       {:error, reason} ->
         {:error, reason}
     end
@@ -68,7 +72,7 @@ defmodule Kconnectex.CLI.Configuration do
   def format_error(:enoent), do: "file not found"
 
   defp config_file(:use_home_or_local) do
-    files = Enum.filter(default_files(), &File.exists?/1)
+    files = Enum.filter(default_files(), &File.regular?/1)
 
     if Enum.any?(files) do
       {:ok, hd(files)}
