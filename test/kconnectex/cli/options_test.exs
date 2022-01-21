@@ -16,10 +16,10 @@ defmodule Kconnectex.CLI.OptionsTest do
       assert "--unexpected is not valid" in opts.errors
     end
 
-    test "--url is required" do
+    test "--url is required with no configuration file" do
       opts = Options.parse(["connectors"])
 
-      assert "--url is required" in opts.errors
+      assert "Either create a configuration file or explictly use the --url option" in opts.errors
     end
 
     test "no url is required when working with configuration" do

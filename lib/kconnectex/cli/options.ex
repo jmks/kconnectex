@@ -71,7 +71,14 @@ defmodule Kconnectex.CLI.Options do
         %{opts | url: url(cluster_config)}
 
       true ->
-        %{opts | errors: ["--url is required" | opts.errors]}
+        message =
+          if map_size(opts.config) == 0 do
+            "Either create a configuration file or explictly use the --url option"
+          else
+            "--url is required"
+          end
+
+        %{opts | errors: [message | opts.errors]}
     end
   end
 
