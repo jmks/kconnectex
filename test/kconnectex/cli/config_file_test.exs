@@ -58,7 +58,15 @@ defmodule Kconnectex.CLI.ConfigFileTest do
   describe ".write" do
     setup :valid_config
     test "writes a valid configuration to disk", %{tmp_dir: dir, valid_config: config} do
-      assert :ok = ConfigFile.write(config, Path.join([dir, "serialized.json"]))
+      filepath = Path.join([dir, "serialized.json"])
+
+      assert :ok = ConfigFile.write(config, filepath)
+
+      assert {:ok, read_config} = ConfigFile.load(filepath)
+
+      # when reading, we add the config_file_path key
+      assert read_config[:config_file_path] == filepath
+      assert Map.delete(read_config, :config_file_path) == config
     end
   end
 
@@ -68,7 +76,7 @@ defmodule Kconnectex.CLI.ConfigFileTest do
 
   def valid_config(context) do
     Map.put(context, :valid_config, %{
-      "clusters" => %{"local" => %{"host" => "localhost", port: 8083}}
+      "clusters" => %{"local" => %{"host" => "localhost", "port" => 8083}}
     })
   end
 end
