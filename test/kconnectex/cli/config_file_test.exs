@@ -48,15 +48,27 @@ defmodule Kconnectex.CLI.ConfigFileTest do
       assert ConfigFile.format_error(reason) == "cluster local port must be an integer"
     end
 
-    test "ok with a valid host" do
-      assert {:ok, _} =
-               ConfigFile.validate_config(%{
-                 "clusters" => %{"local" => %{"host" => "localhost"}}
-               })
+    setup :valid_config
+    test "ok with valid configuration", %{valid_config: config} do
+      assert {:ok, _} = ConfigFile.validate_config(config)
+    end
+  end
+
+  @tag :tmp_dir
+  describe ".write" do
+    setup :valid_config
+    test "writes a valid configuration to disk", %{tmp_dir: dir, valid_config: config} do
+      assert :ok = ConfigFile.write(config, Path.join([dir, "serialized.json"]))
     end
   end
 
   defp fixture(filename) do
     Path.join("test/fixtures/config", filename)
+  end
+
+  def valid_config(context) do
+    Map.put(context, :valid_config, %{
+      "clusters" => %{"local" => %{"host" => "localhost", port: 8083}}
+    })
   end
 end
