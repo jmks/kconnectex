@@ -3,28 +3,39 @@ defmodule Kconnectex.CLI.ConfigFileTest do
 
   alias Kconnectex.CLI.ConfigFile
 
-  test "example is valid" do
-    assert {:ok, _} = ConfigFile.load(".kconnectex.json.example")
+  describe ".load/1" do
+    test "loads example" do
+      assert {:ok, config} = ConfigFile.load(".kconnectex.json.example")
+
+      assert config["selected_cluster"] == "local"
+      assert config["clusters"]["local"]["host"] == "localhost"
+      assert config["clusters"]["test"]["host"] == "https://testhost"
+    end
+
+    test "returns an error when the selected cluster is not in the list of clusters" do
+      assert {:error, reason} = ConfigFile.load(fixture("missing_selected_cluster.json"))
+
+      assert String.contains?(
+        ConfigFile.format_error(reason),
+        "selected cluster test does not exist"
+      )
+    end
+
+    test "returns an error when configuration file is missing" do
+      assert {:error, :no_configuration_file} = ConfigFile.load(fixture("nonexistant_file.json"))
+      error = ConfigFile.format_error(:no_configuration_file)
+
+      assert String.contains?(error, "Could not find configuration file")
+      assert String.contains?(error, Path.join([System.user_home(), ".kconnectex.json"]))
+      assert String.contains?(error, Path.join([File.cwd!(), ".kconnectex.json"]))
+    end
+
+    test "returns an error when configuration is not a file (:eisdir)" do
+      assert {:error, :no_configuration_file} = ConfigFile.load(fixture(""))
+    end
   end
 
-  test "returns an error when the selected cluster is not in the list of clusters" do
-    assert {:error, reason} = ConfigFile.load(fixture("missing_selected_cluster.json"))
-
-    assert String.contains?(
-             ConfigFile.format_error(reason),
-             "selected cluster test does not exist"
-           )
-  end
-
-  test "returns an error when configuration file is missing" do
-    assert {:error, :no_configuration_file} = ConfigFile.load(fixture("nonexistant_file.json"))
-  end
-
-  test "returns an error when configuration is not a file (:eisdir)" do
-    assert {:error, :no_configuration_file} = ConfigFile.load(fixture(""))
-  end
-
-  describe ".validate_config" do
+  describe ".validate_config/1" do
     setup :config_without_host
 
     test "errors without a host", %{invalid_config: config} do
@@ -56,7 +67,7 @@ defmodule Kconnectex.CLI.ConfigFileTest do
     end
   end
 
-  describe ".write" do
+  describe ".write/2" do
     @describetag :tmp_dir
 
     setup :valid_config
