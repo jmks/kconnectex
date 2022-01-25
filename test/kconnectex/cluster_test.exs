@@ -22,7 +22,7 @@ defmodule Kconnectex.ClusterTest do
 
     {:ok, cluster_info} = Cluster.info(connect_client())
 
-    assert cluster_info["version"] == "2.6.0"
+    assert cluster_info["version"] == "3.0.0"
     assert Map.has_key?(cluster_info, "commit")
     assert Map.has_key?(cluster_info, "kafka_cluster_id")
   end
