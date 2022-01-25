@@ -75,6 +75,12 @@ defmodule Kconnectex.CLI.OptionsTest do
       assert options.errors == ["selected cluster local was not found in the configuration"]
     end
 
+    test "errors when --cluster provided with no configuration" do
+      options = Options.parse(["--cluster", "unknown", "cluster"], %{})
+
+      assert "--cluster was provided but no configuration file was found" in options.errors
+    end
+
     test "use --cluster option" do
       config = %{
         "clusters" => %{
@@ -86,8 +92,16 @@ defmodule Kconnectex.CLI.OptionsTest do
     end
 
     test "adds error when --cluster does not exist" do
-      assert %{errors: ["Cluster unknown was not found in the configuration"]} =
-               Options.parse(["--cluster", "unknown", "cluster"], %{})
+      config = %{
+        "clusters" => %{
+          "other" => %{"host" => "testhost"}
+        },
+        config_file_path: "some_path.json"
+      }
+
+      options = Options.parse(["--cluster", "some_other", "cluster"], config)
+
+      assert "The provided --cluster 'some_other' was not found in the configuration file 'some_path.json'" in options.errors
     end
 
     test "--url is preferred over --cluster, which is preferred over configuration" do

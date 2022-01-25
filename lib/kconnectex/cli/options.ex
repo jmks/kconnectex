@@ -47,15 +47,7 @@ defmodule Kconnectex.CLI.Options do
     if cluster_config do
       %{opts | url: url(cluster_config)}
     else
-      actual_clusters = Map.keys(opts.config["clusters"])
-
-      errors = [
-        "The provided --cluster '#{cluster}' was not found in the configuration file '#{opts.config.config_file_path}'",
-        "That configuration file contains these clusters:"
-        | Enum.map(actual_clusters, fn cluster -> "  #{cluster}" end)
-      ]
-
-      %{opts | errors: errors}
+      missing_cluster_error(opts, cluster)
     end
   end
 
@@ -79,6 +71,25 @@ defmodule Kconnectex.CLI.Options do
           end
 
         %{opts | errors: [message | opts.errors]}
+    end
+  end
+
+  defp missing_cluster_error(opts, target_cluster) do
+    if map_size(opts.config) != 0 do
+      clusters = get_in(opts.config, ["clusters"])
+      cluster_names = if is_map(clusters), do: Map.keys(clusters), else: []
+
+      errors = [
+        "The provided --cluster '#{target_cluster}' was not found in the configuration file '#{opts.config.config_file_path}'",
+        "That configuration file contains these clusters:"
+        | Enum.map(cluster_names, fn cluster -> "  #{cluster}" end)
+      ]
+
+      %{opts | errors: errors ++ opts.errors}
+    else
+      error = "--cluster was provided but no configuration file was found"
+
+      %{opts | errors: [error | opts.errors]}
     end
   end
 
