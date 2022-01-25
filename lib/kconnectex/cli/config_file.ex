@@ -1,5 +1,5 @@
-defmodule Kconnectex.CLI.Configuration do
-  @config_filename ".kconnectex.json"
+defmodule Kconnectex.CLI.ConfigFile do
+  @filename ".kconnectex.json"
 
   def load(filepath \\ :use_home_or_local) do
     with {:ok, file} <- config_file(filepath),
@@ -86,7 +86,7 @@ defmodule Kconnectex.CLI.Configuration do
   defp default_files do
     [System.user_home(), File.cwd!()]
     |> Enum.filter(& &1)
-    |> Enum.map(fn dir -> Path.join([dir, @config_filename]) end)
+    |> Enum.map(fn dir -> Path.join([dir, @filename]) end)
   end
 
   defp validate_app_settings(%{"selected_cluster" => cluster, "clusters" => clusters}) do

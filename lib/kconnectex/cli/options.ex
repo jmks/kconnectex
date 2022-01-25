@@ -1,11 +1,11 @@
 defmodule Kconnectex.CLI.Options do
-  alias Kconnectex.CLI.Configuration
+  alias Kconnectex.CLI.ConfigFile
 
   @enforce_keys [:config]
   defstruct [:config, url: :no_configuration, help?: false, command: [], errors: []]
 
   def extract(args) do
-    case Configuration.load() do
+    case ConfigFile.load() do
       {:ok, config} ->
         parse(args, config)
 
@@ -14,7 +14,7 @@ defmodule Kconnectex.CLI.Options do
         %{opts | config: :no_configuration_file}
 
       {:error, reason} ->
-        {:error, Configuration.format_error(reason)}
+        {:error, ConfigFile.format_error(reason)}
     end
   end
 

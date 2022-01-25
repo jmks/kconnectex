@@ -78,7 +78,7 @@ defmodule Kconnectex.CLI.Help do
 
     plugins validate
       Validate connector plugin configuration.
-      Configuration is read from STDIN and assumed to be JSON.
+      ConfigFile is read from STDIN and assumed to be JSON.
     """)
   end
 
@@ -109,7 +109,7 @@ defmodule Kconnectex.CLI.Help do
 
     connector create CONNECTOR
       Create a connector with name CONNECTOR.
-      Configuration is read from STDIN and assumed to be JSON.
+      ConfigFile is read from STDIN and assumed to be JSON.
 
     connector delete CONNECTOR
       Delete the given CONNECTOR.
@@ -131,7 +131,7 @@ defmodule Kconnectex.CLI.Help do
 
     connector update CONNECTOR
       Update configuration for the given CONNECTOR.
-      Configuration is read from STDIN and assumed to be JSON.
+      ConfigFile is read from STDIN and assumed to be JSON.
     """)
   end
 

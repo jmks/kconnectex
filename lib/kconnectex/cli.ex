@@ -1,5 +1,5 @@
 defmodule Kconnectex.CLI do
-  alias Kconnectex.CLI.{Configuration, Options}
+  alias Kconnectex.CLI.{ConfigFile, Options}
 
   import Kconnectex.CLI.Help
 
@@ -55,7 +55,7 @@ defmodule Kconnectex.CLI do
         if get_in(config, ["clusters", selected]) do
           config
           |> Map.put("selected_cluster", selected)
-          |> Configuration.write()
+          |> ConfigFile.write()
           |> display()
         else
           cluster_choices =
@@ -86,7 +86,7 @@ defmodule Kconnectex.CLI do
             end
 
           new_config
-          |> Configuration.write()
+          |> ConfigFile.write()
           |> display()
         else
           display(:ok)
@@ -238,12 +238,12 @@ defmodule Kconnectex.CLI do
     cluster_config = extract_cluster_config(host, port)
     new_config = put_in(config["clusters"][name], cluster_config)
 
-    case Configuration.write(new_config) do
+    case ConfigFile.write(new_config) do
       :ok ->
         display(:ok)
 
       {:error, reason} ->
-        message = Configuration.format_error(reason)
+        message = ConfigFile.format_error(reason)
         display({:error, message})
     end
   end
