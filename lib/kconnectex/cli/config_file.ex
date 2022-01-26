@@ -69,8 +69,6 @@ defmodule Kconnectex.CLI.ConfigFile do
     "cluster #{cluster} port must be an integer"
   end
 
-  def format_error(:enoent), do: "file not found"
-
   defp config_file(:use_home_or_local) do
     files = Enum.filter(default_files(), &File.regular?/1)
 
