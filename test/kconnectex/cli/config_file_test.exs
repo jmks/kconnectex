@@ -3,6 +3,8 @@ defmodule Kconnectex.CLI.ConfigFileTest do
 
   alias Kconnectex.CLI.ConfigFile
 
+  import Fixtures, only: [fixture: 1]
+
   describe ".load/1" do
     test "loads example" do
       assert {:ok, config} = ConfigFile.load(".kconnectex.json.example")
@@ -12,17 +14,17 @@ defmodule Kconnectex.CLI.ConfigFileTest do
       assert config["clusters"]["test"]["host"] == "https://testhost"
     end
 
-    test "returns an error when the selected cluster is not in the list of clusters" do
-      assert {:error, reason} = ConfigFile.load(fixture("missing_selected_cluster.json"))
+    test "errors when the selected cluster is not in the list of clusters" do
+      assert {:error, reason} = ConfigFile.load(fixture("config/missing_selected_cluster.json"))
 
       assert String.contains?(
-        ConfigFile.format_error(reason),
-        "selected cluster test does not exist"
-      )
+               ConfigFile.format_error(reason),
+               "selected cluster test does not exist"
+             )
     end
 
-    test "returns an error when configuration file is missing" do
-      assert {:error, :no_configuration_file} = ConfigFile.load(fixture("nonexistant_file.json"))
+    test "errors when configuration file is missing" do
+      assert {:error, :no_configuration_file} = ConfigFile.load(fixture("config/nonexistant_file.json"))
       error = ConfigFile.format_error(:no_configuration_file)
 
       assert String.contains?(error, "Could not find configuration file")
@@ -30,8 +32,8 @@ defmodule Kconnectex.CLI.ConfigFileTest do
       assert String.contains?(error, Path.join([File.cwd!(), ".kconnectex.json"]))
     end
 
-    test "returns an error when configuration is not a file (:eisdir)" do
-      assert {:error, :no_configuration_file} = ConfigFile.load(fixture(""))
+    test "errors when configuration is not a file (e.g. :eisdir)" do
+      assert {:error, :no_configuration_file} = ConfigFile.load(fixture("config/"))
     end
   end
 
@@ -92,10 +94,6 @@ defmodule Kconnectex.CLI.ConfigFileTest do
       assert {:error, reason} = ConfigFile.write(config, filepath)
       assert reason == {:missing_host, "local"}
     end
-  end
-
-  defp fixture(filename) do
-    Path.join("test/fixtures/config", filename)
   end
 
   def valid_config(context) do

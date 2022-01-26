@@ -14,5 +14,13 @@ defmodule IntegrationHelpers do
   end
 end
 
+defmodule Fixtures do
+  @path "test/fixtures"
+
+  def fixture(filename) do
+    Path.join(@path, filename)
+  end
+end
+
 ExUnit.configure(exclude: :integration)
 ExUnit.start()
