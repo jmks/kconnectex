@@ -5,9 +5,9 @@ defmodule Kconnectex.CLI.ConfigFileTest do
 
   import Fixtures, only: [fixture: 1]
 
-  describe ".load/1" do
-    test "loads example" do
-      assert {:ok, config} = ConfigFile.load(".kconnectex.json.example")
+  describe "read/1" do
+    test "reads example file" do
+      assert {:ok, config} = ConfigFile.read(".kconnectex.json.example")
 
       assert config["selected_cluster"] == "local"
       assert config["clusters"]["local"]["host"] == "localhost"
@@ -15,7 +15,7 @@ defmodule Kconnectex.CLI.ConfigFileTest do
     end
 
     test "errors when the selected cluster is not in the list of clusters" do
-      assert {:error, reason} = ConfigFile.load(fixture("config/missing_selected_cluster.json"))
+      assert {:error, reason} = ConfigFile.read(fixture("config/missing_selected_cluster.json"))
 
       assert String.contains?(
                ConfigFile.format_error(reason),
@@ -24,7 +24,7 @@ defmodule Kconnectex.CLI.ConfigFileTest do
     end
 
     test "errors when configuration file is missing" do
-      assert {:error, :no_configuration_file} = ConfigFile.load(fixture("config/nonexistant_file.json"))
+      assert {:error, :no_configuration_file} = ConfigFile.read(fixture("config/nonexistant_file.json"))
       error = ConfigFile.format_error(:no_configuration_file)
 
       assert String.contains?(error, "Could not find configuration file")
@@ -33,11 +33,11 @@ defmodule Kconnectex.CLI.ConfigFileTest do
     end
 
     test "errors when configuration is not a file (e.g. :eisdir)" do
-      assert {:error, :no_configuration_file} = ConfigFile.load(fixture("config/"))
+      assert {:error, :no_configuration_file} = ConfigFile.read(fixture("config/"))
     end
   end
 
-  describe ".validate_config/1" do
+  describe "validate_config/1" do
     setup :config_without_host
 
     test "errors without a host", %{invalid_config: config} do
@@ -69,7 +69,7 @@ defmodule Kconnectex.CLI.ConfigFileTest do
     end
   end
 
-  describe ".write/2" do
+  describe "write/2" do
     @describetag :tmp_dir
 
     setup :valid_config
@@ -79,7 +79,7 @@ defmodule Kconnectex.CLI.ConfigFileTest do
 
       assert :ok = ConfigFile.write(config, filepath)
 
-      assert {:ok, read_config} = ConfigFile.load(filepath)
+      assert {:ok, read_config} = ConfigFile.read(filepath)
 
       # when reading, we add the config_file_path key
       assert read_config[:config_file_path] == filepath

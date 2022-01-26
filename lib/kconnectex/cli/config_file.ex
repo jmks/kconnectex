@@ -1,7 +1,7 @@
 defmodule Kconnectex.CLI.ConfigFile do
   @filename ".kconnectex.json"
 
-  def load(filepath \\ :use_home_or_local) do
+  def read(filepath \\ :use_home_or_local) do
     with {:ok, file} <- config_file(filepath),
          true <- File.regular?(file),
          {:ok, contents} <- File.read(file),

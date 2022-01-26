@@ -5,7 +5,7 @@ defmodule Kconnectex.CLI.Options do
   defstruct [:config, url: :no_configuration, help?: false, command: [], errors: []]
 
   def extract(args) do
-    case ConfigFile.load() do
+    case ConfigFile.read() do
       {:ok, config} ->
         parse(args, config)
 
