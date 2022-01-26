@@ -38,7 +38,7 @@ defmodule Kconnectex.CLI.ConfigFileTest do
   end
 
   describe "validate_config/1" do
-    setup :config_without_host
+    setup [:valid_config, :config_without_host]
 
     test "errors without a host", %{invalid_config: config} do
       assert {:error, reason} = ConfigFile.validate_config(config)
@@ -62,8 +62,6 @@ defmodule Kconnectex.CLI.ConfigFileTest do
       assert ConfigFile.format_error(reason) == "cluster local port must be an integer"
     end
 
-    setup :valid_config
-
     test "ok with valid configuration", %{valid_config: config} do
       assert {:ok, _} = ConfigFile.validate_config(config)
     end
@@ -71,8 +69,7 @@ defmodule Kconnectex.CLI.ConfigFileTest do
 
   describe "write/2" do
     @describetag :tmp_dir
-
-    setup :valid_config
+    setup [:valid_config, :config_without_host]
 
     test "writes a valid configuration to disk", %{tmp_dir: dir, valid_config: config} do
       filepath = Path.join([dir, "serialized.json"])
@@ -85,8 +82,6 @@ defmodule Kconnectex.CLI.ConfigFileTest do
       assert read_config[:config_file_path] == filepath
       assert Map.delete(read_config, :config_file_path) == config
     end
-
-    setup :config_without_host
 
     test "errors when configuration is invalid", %{tmp_dir: dir, invalid_config: config} do
       filepath = Path.join([dir, "serialized.json"])
