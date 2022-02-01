@@ -1,8 +1,15 @@
 #!/bin/bash
 
+mounts=""
+if [ -f "${HOME}/.kconnectex.json" ]; then
+    mounts+="--mount type=bind,source=${HOME}/.kconnectex.json,target=/home/app/.kconnectex.json "
+fi
+if [ -f "${PWD}/.kconnectex.json" ]; then
+    mounts+="--mount type=bind,source=${PWD}/.kconnectex.json,target=/home/app/kconnectex/.kconnectex.json"
+fi
+
 exec docker run \
-  --interactive --tty --rm \
-  --volume "${HOME}/.kconnectex.json":"/home/app/.kconnectex.json" \
-  --volume "$(pwd)/.kconnectex.json":"/home/app/kconnectex/.kconnectex.json" \
-  --network host \
-  "quay.io/jmks/kconnectex:0.3.0" "$@"
+     --interactive --rm \
+     ${mounts} \
+     --network host \
+     "quay.io/jmks/kconnectex:0.3.0" "$@"
