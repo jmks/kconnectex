@@ -85,7 +85,9 @@ $ mix test --include integration
 
 You permission to push to the Docker repository (currently, just the author).
 
-A script will release the CLI with a tag of the current version: `./release`
+First, log in with quay.io: `docker login quay.io`
+
+Then run the release script: `./release`
 
 ## Installation
 
