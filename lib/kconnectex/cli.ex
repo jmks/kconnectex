@@ -295,6 +295,13 @@ defmodule Kconnectex.CLI do
     |> Enum.join("\n")
   end
 
+  defp error_description(unknown) do
+    """
+      An unknown error occurred:
+      #{inspect unknown}
+    """
+  end
+
   defp display_errors(errors) do
     IO.puts("Here are some errors that need to be resolved:")
     Enum.each(errors, &IO.puts/1)
