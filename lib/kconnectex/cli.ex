@@ -283,19 +283,23 @@ defmodule Kconnectex.CLI do
   end
 
   defp error_description(:econnrefused), do: "  Connection to server failed"
-
+  defp error_description(:closed), do: "  Connection to server closed"
   defp error_description(:nxdomain), do: "  Domain not found. Is the cluster reachable?"
-
   defp error_description(:timeout), do: "  Timed out connecting to server"
-
   defp error_description(:not_found), do: "  Not found"
-
   defp error_description(:rebalancing), do: "  Connect is rebalancing. Try again later."
 
   defp error_description(messages) when is_list(messages) do
     messages
     |> Enum.map(&"  #{&1}")
     |> Enum.join("\n")
+  end
+
+  defp error_description(unknown) do
+    """
+      An unknown error occurred:
+      #{inspect unknown}
+    """
   end
 
   defp display_errors(errors) do
