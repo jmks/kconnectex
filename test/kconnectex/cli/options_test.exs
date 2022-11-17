@@ -22,6 +22,12 @@ defmodule Kconnectex.CLI.OptionsTest do
       assert "Either create a configuration file or explictly use the --url option" in opts.errors
     end
 
+    test "no url is required when getting help" do
+      opts = Options.parse(["--help"])
+
+      assert opts.errors == []
+    end
+
     test "no url is required when working with configuration" do
       opts = Options.parse(["config"])
 
