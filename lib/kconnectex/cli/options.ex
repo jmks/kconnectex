@@ -41,7 +41,7 @@ defmodule Kconnectex.CLI.Options do
     %{opts | url: url}
   end
 
-  defp set_url(opts, _url, cluster) when not is_nil(cluster) do
+  defp set_url(opts, _url, cluster) when is_binary(cluster) do
     cluster_config = get_in(opts.config, ["clusters", cluster])
 
     if cluster_config do
