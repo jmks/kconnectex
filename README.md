@@ -107,7 +107,7 @@ by adding `kconnectex` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:kconnectex, "~> 0.2.0"}
+    {:kconnectex, "~> 0.3.1"}
   ]
 end
 ```

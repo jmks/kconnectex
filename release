@@ -5,7 +5,7 @@ set -x
 tag=$(cat mix.exs | grep "version:" | cut -d\" -f2)
 
 docker buildx build \
-       --platform linux/amd64,linux/arm64 \
+       --platform linux/amd64,linux/arm64/v8 \
        --tag quay.io/jmks/kconnectex:${tag} \
        --push \
        .
