@@ -45,7 +45,7 @@ defmodule Kconnectex.CLI.Options do
     cluster_config = get_in(opts.config, ["clusters", cluster])
 
     if cluster_config do
-      %{opts | url: url(cluster_config)}
+      %{opts | url: build_url(cluster_config)}
     else
       missing_cluster_error(opts, cluster)
     end
@@ -60,7 +60,7 @@ defmodule Kconnectex.CLI.Options do
         %{opts | errors: ["selected cluster #{selected} was not found in the configuration"]}
 
       cluster_config ->
-        %{opts | url: url(cluster_config)}
+        %{opts | url: build_url(cluster_config)}
 
       true ->
         message =
@@ -110,7 +110,7 @@ defmodule Kconnectex.CLI.Options do
     %{opts | command: command}
   end
 
-  defp url(config) do
+  defp build_url(config) do
     host = Map.fetch!(config, "host")
     port = Map.get(config, "port")
 
