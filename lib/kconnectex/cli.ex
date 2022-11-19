@@ -291,13 +291,13 @@ defmodule Kconnectex.CLI do
   end
 
   defp display({:error, %{"message" => message}}) do
-    IO.puts("Error with request:")
-    IO.puts(error_description([message]))
+    IO.puts(:stderr, "Error with request:")
+    IO.puts(:stderr, error_description([message]))
   end
 
   defp display({:error, message}) do
-    IO.puts("Error with request:")
-    IO.puts(error_description(message))
+    IO.puts(:stderr, "Error with request:")
+    IO.puts(:stderr, error_description(message))
   end
 
   defp error_description(message) when is_binary(message) do
@@ -325,9 +325,9 @@ defmodule Kconnectex.CLI do
   end
 
   defp display_errors(errors) do
-    IO.puts("Here are some errors that need to be resolved:")
-    Enum.each(errors, &IO.puts/1)
-    IO.puts("")
+    IO.puts(:stderr, "Here are some errors that need to be resolved:")
+    Enum.each(errors, &IO.puts(:stderr, &1))
+
     IO.puts("Run `#{:escript.script_name()} --help` for usage")
   end
 
