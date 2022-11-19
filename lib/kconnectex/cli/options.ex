@@ -2,7 +2,7 @@ defmodule Kconnectex.CLI.Options do
   alias Kconnectex.CLI.ConfigFile
 
   @enforce_keys [:config]
-  defstruct [:config, url: :no_configuration, help?: false, command: [], errors: []]
+  defstruct [:config, url: :unset, help?: false, command: [], errors: []]
 
   def extract(args) do
     case ConfigFile.read() do
@@ -41,11 +41,11 @@ defmodule Kconnectex.CLI.Options do
     %{opts | url: url}
   end
 
-  defp set_url(opts, _url, cluster) when not is_nil(cluster) do
+  defp set_url(opts, _url, cluster) when is_binary(cluster) do
     cluster_config = get_in(opts.config, ["clusters", cluster])
 
     if cluster_config do
-      %{opts | url: url(cluster_config)}
+      %{opts | url: build_url(cluster_config)}
     else
       missing_cluster_error(opts, cluster)
     end
@@ -60,12 +60,12 @@ defmodule Kconnectex.CLI.Options do
         %{opts | errors: ["selected cluster #{selected} was not found in the configuration"]}
 
       cluster_config ->
-        %{opts | url: url(cluster_config)}
+        %{opts | url: build_url(cluster_config)}
 
       true ->
         message =
           if map_size(opts.config) == 0 do
-            "Either create a configuration file or explictly use the --url option"
+            "Either create a configuration file or explictly provide --url"
           else
             "--url is required"
           end
@@ -97,7 +97,7 @@ defmodule Kconnectex.CLI.Options do
     messages =
       invalid
       |> Enum.map(&elem(&1, 0))
-      |> Enum.map(fn opt -> "#{opt} is not valid" end)
+      |> Enum.map(fn opt -> "Unknown flag: #{opt}" end)
 
     %{opts | errors: messages ++ opts.errors}
   end
@@ -110,7 +110,7 @@ defmodule Kconnectex.CLI.Options do
     %{opts | command: command}
   end
 
-  defp url(config) do
+  defp build_url(config) do
     host = Map.fetch!(config, "host")
     port = Map.get(config, "port")
 

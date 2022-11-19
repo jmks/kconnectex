@@ -184,11 +184,33 @@ defmodule Kconnectex.CLI do
     end
   end
 
+  # If no connector is selected, but there is only a single connector, use that one.
+  defp run(%{command: ["connector", subcommand], url: url} = opts)
+       when subcommand in ~w(config delete info pause restart resume status) do
+    case Kconnectex.Connectors.list(client(url)) do
+      {:ok, [connector]} ->
+        new_opts = %{opts | command: opts.command ++ [connector]}
+
+        run(new_opts)
+
+      {:ok, connectors} ->
+        choices = Enum.map(connectors, fn c -> "  * #{c}" end) |> Enum.join("\n")
+
+        message = """
+        There are #{length(connectors)} present. Please provide one of:
+        #{choices}
+        """
+
+        display({:error, message})
+
+      {:error, reason} ->
+        display({:error, reason})
+    end
+  end
+
   defp run(%{command: ["connector", subcommand, connector], url: url})
        when subcommand in ~w(config delete info pause restart resume status) do
-    sub = String.to_atom(subcommand)
-
-    apply(Kconnectex.Connectors, sub, [client(url), connector])
+    apply(Kconnectex.Connectors, String.to_atom(subcommand), [client(url), connector])
     |> display()
   end
 
@@ -269,13 +291,13 @@ defmodule Kconnectex.CLI do
   end
 
   defp display({:error, %{"message" => message}}) do
-    IO.puts("Error with request:")
-    IO.puts(error_description([message]))
+    IO.puts(:stderr, "Error with request:")
+    IO.puts(:stderr, error_description([message]))
   end
 
   defp display({:error, message}) do
-    IO.puts("Error with request:")
-    IO.puts(error_description(message))
+    IO.puts(:stderr, "Error with request:")
+    IO.puts(:stderr, error_description(message))
   end
 
   defp error_description(message) when is_binary(message) do
@@ -298,14 +320,14 @@ defmodule Kconnectex.CLI do
   defp error_description(unknown) do
     """
       An unknown error occurred:
-      #{inspect unknown}
+      #{inspect(unknown)}
     """
   end
 
   defp display_errors(errors) do
-    IO.puts("Here are some errors that need to be resolved:")
-    Enum.each(errors, &IO.puts/1)
-    IO.puts("")
+    IO.puts(:stderr, "Here are some errors that need to be resolved:")
+    Enum.each(errors, &IO.puts(:stderr, &1))
+
     IO.puts("Run `#{:escript.script_name()} --help` for usage")
   end
 
