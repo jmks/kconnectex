@@ -2,7 +2,7 @@ defmodule Kconnectex.CLI.Options do
   alias Kconnectex.CLI.ConfigFile
 
   @enforce_keys [:config]
-  defstruct [:config, url: :no_configuration, help?: false, command: [], errors: []]
+  defstruct [:config, url: :unset, help?: false, command: [], errors: []]
 
   def extract(args) do
     case ConfigFile.read() do
@@ -65,7 +65,7 @@ defmodule Kconnectex.CLI.Options do
       true ->
         message =
           if map_size(opts.config) == 0 do
-            "Either create a configuration file or explictly use the --url option"
+            "Either create a configuration file or explictly provide --url"
           else
             "--url is required"
           end
@@ -97,7 +97,7 @@ defmodule Kconnectex.CLI.Options do
     messages =
       invalid
       |> Enum.map(&elem(&1, 0))
-      |> Enum.map(fn opt -> "#{opt} is not valid" end)
+      |> Enum.map(fn opt -> "Unknown flag: #{opt}" end)
 
     %{opts | errors: messages ++ opts.errors}
   end
