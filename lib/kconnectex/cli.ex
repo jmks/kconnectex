@@ -184,11 +184,23 @@ defmodule Kconnectex.CLI do
     end
   end
 
+  # If no connector is selected, but there is only a single connector, use that one.
+  defp run(%{command: ["connector", subcommand], url: url} = opts)
+       when subcommand in ~w(config delete info pause restart resume status) do
+    case Kconnectex.Connectors.list(client(url)) do
+      {:ok, [connector]} ->
+        new_opts = %{opts | command: opts.command ++ [connector]}
+        run(new_opts)
+
+      _ ->
+        # TODO: error message could be more specific
+        unknown_command(opts)
+    end
+  end
+
   defp run(%{command: ["connector", subcommand, connector], url: url})
        when subcommand in ~w(config delete info pause restart resume status) do
-    sub = String.to_atom(subcommand)
-
-    apply(Kconnectex.Connectors, sub, [client(url), connector])
+    apply(Kconnectex.Connectors, String.to_atom(subcommand), [client(url), connector])
     |> display()
   end
 
@@ -298,7 +310,7 @@ defmodule Kconnectex.CLI do
   defp error_description(unknown) do
     """
       An unknown error occurred:
-      #{inspect unknown}
+      #{inspect(unknown)}
     """
   end
 
