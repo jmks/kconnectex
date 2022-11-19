@@ -3,7 +3,7 @@ defmodule Kconnectex.CLI.OptionsTest do
 
   alias Kconnectex.CLI.Options
 
-  describe "parse" do
+  describe ".parse/1" do
     test "help flag" do
       opts = Options.parse(["--help"])
 
@@ -47,7 +47,9 @@ defmodule Kconnectex.CLI.OptionsTest do
       assert opts.command == ["cluster", "info"]
       assert opts.errors == []
     end
+  end
 
+  describe ".parse/2" do
     test "use cluster from configuration" do
       config = %{
         "selected_cluster" => "local",
