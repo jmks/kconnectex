@@ -190,11 +190,21 @@ defmodule Kconnectex.CLI do
     case Kconnectex.Connectors.list(client(url)) do
       {:ok, [connector]} ->
         new_opts = %{opts | command: opts.command ++ [connector]}
+
         run(new_opts)
 
-      _ ->
-        # TODO: error message could be more specific
-        unknown_command(opts)
+      {:ok, connectors} ->
+        choices = Enum.map(connectors, fn c -> "  * #{c}" end) |> Enum.join("\n")
+
+        message = """
+        There are #{length(connectors)} present. Please provide one of:
+        #{choices}
+        """
+
+        display({:error, message})
+
+      {:error, reason} ->
+        display({:error, reason})
     end
   end
 
