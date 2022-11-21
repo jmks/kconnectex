@@ -197,7 +197,7 @@ defmodule Kconnectex.CLI do
         choices = Enum.map(connectors, fn c -> "  * #{c}" end) |> Enum.join("\n")
 
         message = """
-        There are #{length(connectors)} present. Please provide one of:
+        There are #{length(connectors)} connectors present. Please provide one of:
         #{choices}
         """
 
