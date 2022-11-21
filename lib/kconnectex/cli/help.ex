@@ -20,6 +20,7 @@ defmodule Kconnectex.CLI.Help do
       loggers
       logger
       plugins
+      plugin
       tasks
       task
     """)
@@ -76,7 +77,7 @@ defmodule Kconnectex.CLI.Help do
     plugins
       List plugins installed on Connect worker
 
-    plugins validate
+    plugin validate
       Validate connector plugin configuration.
       ConfigFile is read from STDIN and assumed to be JSON.
     """)

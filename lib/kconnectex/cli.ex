@@ -24,6 +24,7 @@ defmodule Kconnectex.CLI do
       ["loggers" | _] -> help(:loggers)
       ["logger" | _] -> help(:loggers)
       ["plugins" | _] -> help(:plugins)
+      ["plugin" | _] -> help(:plugins)
       ["tasks" | _] -> help(:tasks)
       ["task" | _] -> help(:tasks)
       ["connectors" | _] -> help(:connectors)
@@ -124,7 +125,7 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
-  defp run(%{command: ["plugins", "validate"], url: url}) do
+  defp run(%{command: ["plugin", "validate"], url: url}) do
     case read_stdin() do
       {:ok, json} ->
         client(url)
