@@ -24,6 +24,7 @@ defmodule Kconnectex.CLI do
       ["loggers" | _] -> help(:loggers)
       ["logger" | _] -> help(:loggers)
       ["plugins" | _] -> help(:plugins)
+      ["plugin" | _] -> help(:plugins)
       ["tasks" | _] -> help(:tasks)
       ["task" | _] -> help(:tasks)
       ["connectors" | _] -> help(:connectors)
@@ -124,12 +125,15 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
-  defp run(%{command: ["plugins", "validate"], url: url}) do
+  defp run(%{command: ["plugin", "validate"], options: options, url: url}) do
     case read_stdin() do
       {:ok, json} ->
-        client(url)
-        |> Kconnectex.ConnectorPlugins.validate_config(json)
-        |> display()
+        result = client(url) |> Kconnectex.ConnectorPlugins.validate_config(json)
+
+        result =
+          if Keyword.get(options, :errors_only, false), do: extract_errors(result), else: result
+
+        display(result)
 
       {:error, err} ->
         display_errors([Jason.DecodeError.message(err)])
@@ -197,7 +201,7 @@ defmodule Kconnectex.CLI do
         choices = Enum.map(connectors, fn c -> "  * #{c}" end) |> Enum.join("\n")
 
         message = """
-        There are #{length(connectors)} present. Please provide one of:
+        There are #{length(connectors)} connectors present. Please provide one of:
         #{choices}
         """
 
@@ -341,5 +345,16 @@ defmodule Kconnectex.CLI do
     IO.read(:stdio, :all)
     |> String.trim()
     |> Jason.decode()
+  end
+
+  defp extract_errors({:error, reason}), do: {:error, reason}
+
+  defp extract_errors({:ok, result}) do
+    errors =
+      Enum.filter(result["configs"], fn config ->
+        Enum.any?(get_in(config, ["value", "errors"]))
+      end)
+
+    {:ok, errors}
   end
 end
