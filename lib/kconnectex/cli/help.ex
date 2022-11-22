@@ -77,9 +77,12 @@ defmodule Kconnectex.CLI.Help do
     plugins
       List plugins installed on Connect worker
 
-    plugin validate
+    plugin validate [--errors-only]
       Validate connector plugin configuration.
       ConfigFile is read from STDIN and assumed to be JSON.
+
+      --errors-only
+      Filters the configuration to only those with errors.
     """)
   end
 
