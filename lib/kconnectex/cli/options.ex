@@ -2,7 +2,7 @@ defmodule Kconnectex.CLI.Options do
   alias Kconnectex.CLI.ConfigFile
 
   @enforce_keys [:config]
-  defstruct [:config, url: :unset, help?: false, command: [], errors: []]
+  defstruct [:config, url: :unset, help?: false, command: [], options: [], errors: []]
 
   def extract(args) do
     case ConfigFile.read() do
@@ -19,14 +19,16 @@ defmodule Kconnectex.CLI.Options do
   end
 
   def parse(args, config \\ %{}) do
-    flags = [cluster: :string, help: :boolean, url: :string]
-    {parsed, command, invalid} = OptionParser.parse(args, strict: flags)
+    global_flags = [cluster: :string, help: :boolean, url: :string]
+    command_flags = [errors_only: :boolean]
+
+    {parsed, command, invalid} = OptionParser.parse(args, strict: global_flags ++ command_flags)
 
     %__MODULE__{
       help?: Keyword.get(parsed, :help, false),
       config: config
     }
-    |> with_command(command)
+    |> with_command(command, extract_flags(parsed, command_flags))
     |> set_url(Keyword.get(parsed, :url), Keyword.get(parsed, :cluster))
     |> invalid_flag_errors(invalid)
   end
@@ -97,17 +99,33 @@ defmodule Kconnectex.CLI.Options do
     messages =
       invalid
       |> Enum.map(&elem(&1, 0))
+      |> Enum.map(fn
+        flag when is_atom(flag) ->
+          as_flag = flag |> to_string() |> String.replace("_", "-")
+
+          "--#{as_flag}"
+
+        str ->
+          str
+      end)
       |> Enum.map(fn opt -> "Unknown flag: #{opt}" end)
 
     %{opts | errors: messages ++ opts.errors}
   end
 
-  defp with_command(opts, []) do
+  defp with_command(opts, [], _flags) do
     %{opts | help?: true}
   end
 
-  defp with_command(opts, command) do
+  defp with_command(opts, ["plugin", "validate"] = command, flags) do
+    errors_only = Keyword.get(flags, :errors_only, false)
+
+    %{opts | command: command, options: [{:errors_only, errors_only}]}
+  end
+
+  defp with_command(opts, command, flags) do
     %{opts | command: command}
+    |> invalid_flag_errors(flags)
   end
 
   defp build_url(config) do
@@ -119,5 +137,11 @@ defmodule Kconnectex.CLI.Options do
     else
       host
     end
+  end
+
+  defp extract_flags(options, spec) do
+    flags = Enum.map(spec, &elem(&1, 0))
+
+    Enum.filter(options, fn {flag, _} -> flag in flags end)
   end
 end
