@@ -125,12 +125,15 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
-  defp run(%{command: ["plugin", "validate"], url: url}) do
+  defp run(%{command: ["plugin", "validate"], options: options, url: url}) do
     case read_stdin() do
       {:ok, json} ->
-        client(url)
-        |> Kconnectex.ConnectorPlugins.validate_config(json)
-        |> display()
+        result = client(url) |> Kconnectex.ConnectorPlugins.validate_config(json)
+
+        result =
+          if Keyword.get(options, :errors_only, false), do: extract_errors(result), else: result
+
+        display(result)
 
       {:error, err} ->
         display_errors([Jason.DecodeError.message(err)])
@@ -342,5 +345,16 @@ defmodule Kconnectex.CLI do
     IO.read(:stdio, :all)
     |> String.trim()
     |> Jason.decode()
+  end
+
+  defp extract_errors({:error, reason}), do: {:error, reason}
+
+  defp extract_errors({:ok, result}) do
+    errors =
+      Enum.filter(result["configs"], fn config ->
+        Enum.any?(get_in(config, ["value", "errors"]))
+      end)
+
+    {:ok, errors}
   end
 end
