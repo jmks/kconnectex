@@ -12,4 +12,4 @@ exec docker run \
      --interactive --rm \
      ${mounts} \
      --network host \
-     "quay.io/jmks/kconnectex:0.3.0" "$@"
+     "quay.io/jmks/kconnectex:0.3.1" "$@"
