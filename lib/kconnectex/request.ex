@@ -10,8 +10,8 @@ defmodule Kconnectex.Request do
     %__MODULE__{client: client}
   end
 
-  def get(req, path) do
-    %{req | mfa: {Tesla, :get, [URI.encode(path)]}}
+  def get(req, path, opts \\ []) do
+    %{req | mfa: {Tesla, :get, [URI.encode(path), opts]}}
   end
 
   def post(req, path, body) do
