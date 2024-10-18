@@ -7,10 +7,12 @@ defmodule Kconnectex.Connectors do
 
   alias Kconnectex.Request
 
-  def list(client) do
+  def list(client, options \\ []) do
+    request_opts = process_expand(options)
+
     client
     |> Request.new()
-    |> Request.get("/connectors")
+    |> Request.get("/connectors", request_opts)
     |> Request.execute()
   end
 
@@ -66,6 +68,23 @@ defmodule Kconnectex.Connectors do
     request_with_connector(client, connector)
     |> Request.delete("/connectors/#{connector}")
     |> Request.execute()
+  end
+
+  defp process_expand(opts) do
+    expand = Keyword.get(opts, :expand, [])
+    expand = if is_atom(expand) do
+      [expand: expand]
+    else
+      Enum.map(expand, fn opt -> {:expand, opt} end)
+    end
+
+    new_opts = Keyword.delete(opts, :expand)
+
+    if Enum.any?(expand) do
+      Keyword.put(new_opts, :query, expand)
+    else
+      new_opts
+    end
   end
 
   defp request_with_connector(client, connector) do
