@@ -68,6 +68,35 @@ defmodule Kconnectex.CLI.OptionsTest do
     end
   end
 
+  describe "connectors" do
+    test "connectors --expand info" do
+      opts = Options.parse(["--url", "example.com", "connectors", "--expand", "info"])
+
+      assert Enum.empty?(opts.errors)
+      assert {:expand, :info} in opts.options
+    end
+
+    test "connectors --expand status" do
+      opts = Options.parse(["--url", "example.com", "connectors", "--expand", "status"])
+
+      assert Enum.empty?(opts.errors)
+      assert {:expand, :status} in opts.options
+    end
+
+    test "connectors --expand info,status does both" do
+      opts = Options.parse(["--url", "example.com", "connectors", "--expand", "info,status"])
+
+      assert Enum.empty?(opts.errors)
+      assert {:expand, [:info, :status]} in opts.options
+    end
+
+    test "errors with unknown expansion" do
+      opts = Options.parse(["--url", "example.com", "connectors", "--expand", "bigbang"])
+
+      assert "Unknown value for --expand: bigbang" in opts.errors
+    end
+  end
+
   describe ".parse/2" do
     test "--cluster from configuration" do
       config = %{

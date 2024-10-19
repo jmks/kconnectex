@@ -20,7 +20,7 @@ defmodule Kconnectex.CLI.Options do
 
   def parse(args, config \\ %{}) do
     global_flags = [cluster: :string, help: :boolean, url: :string]
-    command_flags = [errors_only: :boolean]
+    command_flags = [errors_only: :boolean, expand: :string]
 
     {parsed, command, invalid} = OptionParser.parse(args, strict: global_flags ++ command_flags)
 
@@ -117,10 +117,36 @@ defmodule Kconnectex.CLI.Options do
     %{opts | help?: true}
   end
 
+  defp with_command(opts, command = ["connectors"], flags) do
+    expands =
+      flags
+      |> Keyword.get(:expand, "")
+      |> String.split(",", trim: true)
+      |> Enum.map(fn
+        "info" -> :info
+        "status" -> :status
+        unknown -> {:error, unknown}
+      end)
+
+    error = Enum.find(expands, &match?({:error, _}, &1))
+    opts = invalid_flag_errors(opts, Keyword.delete(flags, :expand))
+
+    if error do
+      {:error, unknown} = error
+      message = "Unknown value for --expand: #{unknown}"
+
+      %{opts | command: command, errors: [message | opts.errors]}
+    else
+      expand = if length(expands) == 1, do: hd(expands), else: expands
+
+      %{opts | command: command, options: [expand: expand]}
+    end
+  end
+
   defp with_command(opts, ["plugin", "validate"] = command, flags) do
     errors_only = Keyword.get(flags, :errors_only, false)
 
-    %{opts | command: command, options: [{:errors_only, errors_only}]}
+    %{opts | command: command, options: [errors_only: errors_only]}
   end
 
   defp with_command(opts, command, flags) do
