@@ -50,7 +50,14 @@ defmodule Kconnectex.CLI.OptionsTest do
       assert opts.errors == []
     end
 
-    test "--errors-only only valid with plugin validate" do
+    test "plugin validate --errors-only" do
+      opts = Options.parse(["--url", "example.com", "plugin", "validate", "--errors-only"])
+
+      assert {:errors_only, true} in opts.options
+      assert Enum.empty?(opts.errors)
+    end
+
+    test "--errors-only invalid for other commands" do
       opts = Options.parse(["--url", "example.com", "plugin", "validate", "--errors-only"])
 
       assert {:errors_only, true} in opts.options
