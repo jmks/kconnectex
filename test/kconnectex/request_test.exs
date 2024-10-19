@@ -50,7 +50,13 @@ defmodule Kconnectex.RequestTest do
     test "get" do
       req = Request.new(client()) |> Request.get("http://example.com")
 
-      assert req.mfa == {Tesla, :get, ["http://example.com"]}
+      assert req.mfa == {Tesla, :get, ["http://example.com", []]}
+    end
+
+    test "get with params" do
+      req = Request.new(client()) |> Request.get("http://example.com", query: [a: 1, b: 2])
+
+      assert req.mfa == {Tesla, :get, ["http://example.com", [query: [a: 1, b: 2]]]}
     end
 
     test "post" do
@@ -75,7 +81,7 @@ defmodule Kconnectex.RequestTest do
       path_part = "with space"
       req = Request.new(client()) |> Request.get("http://example.com/#{path_part}")
 
-      assert req.mfa == {Tesla, :get, ["http://example.com/with%20space"]}
+      assert req.mfa == {Tesla, :get, ["http://example.com/with%20space", []]}
     end
   end
 

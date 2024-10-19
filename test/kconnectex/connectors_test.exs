@@ -4,6 +4,35 @@ defmodule Kconnectex.ConnectorsTest do
   alias Kconnectex.Connectors
 
   defmodule FakeAdapter do
+    def call(%{url: "localhost/connectors", method: :get, query: query}, _)
+        when length(query) > 0 do
+      body =
+        Enum.reduce(query, %{"a" => %{}, "b" => %{}, "c" => %{}}, fn
+          {:expand, :info}, body ->
+            body
+            |> Enum.map(fn {key, value} -> {key, Map.put(value, "info", %{"config" => %{}})} end)
+            |> Enum.into(%{})
+
+          {:expand, :status}, body ->
+            body
+            |> Enum.map(fn {key, value} ->
+              status = %{
+                "connector" => %{"state" => "RUNNING"},
+                "tasks" => [%{"state" => Enum.random(["RUNNING", "PAUSED", "FAILED"])}]
+              }
+
+              {key, Map.put(value, "status", status)}
+            end)
+            |> Enum.into(%{})
+        end)
+
+      {:ok, %Tesla.Env{status: 200, body: body}}
+    end
+
+    def call(%{url: "localhost/connectors", method: :get}, _) do
+      {:ok, %Tesla.Env{status: 200, body: ["a", "b", "c"]}}
+    end
+
     def call(%{url: "409" <> _}, _) do
       {:ok, %Tesla.Env{status: 409, body: nil}}
     end
@@ -45,6 +74,54 @@ defmodule Kconnectex.ConnectorsTest do
 
     def call(%{method: :put, url: "localhost/connectors/debezium/resume"}, _) do
       {:ok, %Tesla.Env{status: 202, body: ""}}
+    end
+  end
+
+  test "GET /connectors" do
+    {:ok, list} = Connectors.list(client())
+
+    assert list == ["a", "b", "c"]
+  end
+
+  test "GET /connectors expanding info" do
+    {:ok, map} = Connectors.list(client(), expand: :info)
+
+    for connector <- ["a", "b", "c"] do
+      assert Map.has_key?(map, connector)
+      assert Map.has_key?(map[connector], "info")
+      assert Map.has_key?(map[connector]["info"], "config")
+    end
+  end
+
+  test "GET /connectors expanding status" do
+    {:ok, map} = Connectors.list(client(), expand: :status)
+
+    for connector <- ["a", "b", "c"] do
+      assert Map.has_key?(map, connector)
+      assert Map.has_key?(map[connector], "status")
+      assert Map.has_key?(map[connector]["status"]["connector"], "state")
+
+      for task <- map[connector]["status"]["tasks"] do
+        assert Map.has_key?(task, "state")
+      end
+    end
+  end
+
+  test "GET /connectors expanding info and status" do
+    {:ok, map} = Connectors.list(client(), expand: [:status, :info])
+
+    for connector <- ["a", "b", "c"] do
+      assert Map.has_key?(map, connector)
+
+      assert Map.has_key?(map[connector], "info")
+
+      # status
+      assert Map.has_key?(map[connector], "status")
+      assert Map.has_key?(map[connector]["status"]["connector"], "state")
+
+      for task <- map[connector]["status"]["tasks"] do
+        assert Map.has_key?(task, "state")
+      end
     end
   end
 

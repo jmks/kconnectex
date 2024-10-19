@@ -50,7 +50,14 @@ defmodule Kconnectex.CLI.OptionsTest do
       assert opts.errors == []
     end
 
-    test "--errors-only only valid with plugin validate" do
+    test "plugin validate --errors-only" do
+      opts = Options.parse(["--url", "example.com", "plugin", "validate", "--errors-only"])
+
+      assert {:errors_only, true} in opts.options
+      assert Enum.empty?(opts.errors)
+    end
+
+    test "--errors-only invalid for other commands" do
       opts = Options.parse(["--url", "example.com", "plugin", "validate", "--errors-only"])
 
       assert {:errors_only, true} in opts.options
@@ -58,6 +65,35 @@ defmodule Kconnectex.CLI.OptionsTest do
       opts = Options.parse(["--url", "example.com", "connectors", "--errors-only"])
 
       assert "Unknown flag: --errors-only" in opts.errors
+    end
+  end
+
+  describe "connectors" do
+    test "connectors --expand info" do
+      opts = Options.parse(["--url", "example.com", "connectors", "--expand", "info"])
+
+      assert Enum.empty?(opts.errors)
+      assert {:expand, :info} in opts.options
+    end
+
+    test "connectors --expand status" do
+      opts = Options.parse(["--url", "example.com", "connectors", "--expand", "status"])
+
+      assert Enum.empty?(opts.errors)
+      assert {:expand, :status} in opts.options
+    end
+
+    test "connectors --expand info,status does both" do
+      opts = Options.parse(["--url", "example.com", "connectors", "--expand", "info,status"])
+
+      assert Enum.empty?(opts.errors)
+      assert {:expand, [:info, :status]} in opts.options
+    end
+
+    test "errors with unknown expansion" do
+      opts = Options.parse(["--url", "example.com", "connectors", "--expand", "bigbang"])
+
+      assert "Unknown value for --expand: bigbang" in opts.errors
     end
   end
 
