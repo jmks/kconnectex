@@ -7,6 +7,47 @@ defmodule Kconnectex.Connectors do
 
   alias Kconnectex.Request
 
+  @doc """
+  Lists active connectors.
+
+  https://docs.confluent.io/platform/current/connect/references/restapi.html#get--connectors
+
+  ## Parameters
+
+  - client: client from `Kconnectex.client/1`
+
+  ## Options
+
+  - expand: either `:status`, `:info`, or a list of them: `[:info, :status]`
+
+  ## Examples
+
+  > Kconnectex.Connectors.list(client)
+
+  {:ok, ["debezium", "replicator"]}
+
+  > Kconnectex.Connectors.list(client, :status)
+
+  {:ok, %{
+    "debezium" => %{
+      "status" => %{
+        "name" => "debezium",
+        "connector" => {
+          "state" => "RUNNING",
+          "worker_id" => "10.0.0.162:8083"
+        },
+        "tasks": [
+          %{
+            "id" => 0,
+            "state" => "RUNNING",
+            "worker_id" => "10.0.0.162:8083"
+          }
+        ],
+        "type": "sink"
+      }
+    }
+  }}
+  """
   def list(client, options \\ []) do
     request_opts = process_expand(options)
 
