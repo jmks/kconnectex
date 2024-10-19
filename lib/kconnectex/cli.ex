@@ -158,9 +158,11 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
-  defp run(%{command: ["connectors"], url: url}) do
+  defp run(opts = %{command: ["connectors"]}) do
+    %{url: url, options: options} = opts
+
     client(url)
-    |> Kconnectex.Connectors.list()
+    |> Kconnectex.Connectors.list(options)
     |> display()
   end
 
