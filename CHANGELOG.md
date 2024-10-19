@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* (client) `Connectors.restart/3` adds options `includeTasks` and `onlyFailed`
+
+Both default to `false`.
+
 * (client) `Connectors.list/2` adds option `expand`
 
 Can be `:info`, `:status`, or both as `[:info, :status]`.
