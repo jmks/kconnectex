@@ -20,19 +20,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* (client) `Connectors.restart/3` adds options `includeTasks` and `onlyFailed`
+* (cli) Add `connector restart` options `--include-tasks` and `--only-failed`
+* (client) Add `includeTasks` and `onlyFailed` options to `Connectors.restart/3`
 
 Both default to `false`.
 
-* (client) `Connectors.list/2` adds option `expand`
+* (client) Add `:expand` option to `Connectors.list/2`
 
 Can be `:info`, `:status`, or both as `[:info, :status]`.
 
-* (cli) `connectors` adds `--expand` option
+* (cli) Add `--expand` option to `connectors`
 
 Can be a comma-separated list of values for `:expand` in `Connectors.list/2`.
 
-* (cli) `plugin validate` adds `--errors-only` option
+* (cli) Add `--errors-only` option to `plugin validate`
 
 This will only configs that have an error present.
 
