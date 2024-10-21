@@ -97,6 +97,40 @@ defmodule Kconnectex.CLI.OptionsTest do
     end
   end
 
+  describe "connector restart" do
+    test "connector restart :name" do
+      opts = Options.parse(["--url", "example.com", "connector", "restart", "debezium"])
+
+      assert Enum.empty?(opts.errors)
+      assert opts.command == ["connector", "restart", "debezium"]
+    end
+
+    test "connector restart :name --only-failed" do
+      opts = Options.parse(["--url", "example.com", "connector", "restart", "debezium", "--only-failed"])
+
+      assert Enum.empty?(opts.errors)
+      assert opts.command == ["connector", "restart", "debezium"]
+      assert {:only_failed, true} in opts.options
+    end
+
+    test "connector restart :name --include-tasks" do
+      opts = Options.parse(["--url", "example.com", "connector", "restart", "debezium", "--include-tasks"])
+
+      assert Enum.empty?(opts.errors)
+      assert opts.command == ["connector", "restart", "debezium"]
+      assert {:include_tasks, true} in opts.options
+    end
+
+    test "connector restart :name --only-failed --include-tasks" do
+      opts = Options.parse(["--url", "example.com", "connector", "restart", "debezium", "--include-tasks", "--only-failed"])
+
+      assert Enum.empty?(opts.errors)
+      assert opts.command == ["connector", "restart", "debezium"]
+      assert {:include_tasks, true} in opts.options
+      assert {:only_failed, true} in opts.options
+    end
+  end
+
   describe ".parse/2" do
     test "--cluster from configuration" do
       config = %{
