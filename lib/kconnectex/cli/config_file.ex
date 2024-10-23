@@ -28,6 +28,8 @@ defmodule Kconnectex.CLI.ConfigFile do
   end
 
   def write(config, filepath \\ :use_home_or_local) do
+    config = Map.delete(config, :config_file_path)
+
     with {:ok, validated} <- validate_config(config),
          {:ok, json} <- Jason.encode(validated, pretty: true),
          {:ok, file} <- config_file(filepath),
