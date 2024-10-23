@@ -14,8 +14,8 @@ defmodule Kconnectex.Request do
     %{req | mfa: {Tesla, :get, [URI.encode(path), opts]}}
   end
 
-  def post(req, path, body) do
-    %{req | mfa: {Tesla, :post, [URI.encode(path), body]}}
+  def post(req, path, body, opts \\ []) do
+    %{req | mfa: {Tesla, :post, [URI.encode(path), body, opts]}}
   end
 
   def put(req, path, body) do

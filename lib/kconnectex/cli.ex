@@ -192,7 +192,7 @@ defmodule Kconnectex.CLI do
 
   # If no connector is selected, but there is only a single connector, use that one.
   defp run(%{command: ["connector", subcommand], url: url} = opts)
-       when subcommand in ~w(config delete info pause restart resume status) do
+       when subcommand in ~w(config delete info pause resume status) do
     case Kconnectex.Connectors.list(client(url)) do
       {:ok, [connector]} ->
         new_opts = %{opts | command: opts.command ++ [connector]}
@@ -214,8 +214,18 @@ defmodule Kconnectex.CLI do
     end
   end
 
+  # TODO: this breaks the above pattern -- when a single connector exists
+  # it will use that if the name is not provided.
+  # I may remove that feature in favour of a --watch option
+  defp run(opts = %{command: ["connector", "restart", connector]}) do
+    opts.url
+    |> client()
+    |> Kconnectex.Connectors.restart(connector, opts.options)
+    |> display()
+  end
+
   defp run(%{command: ["connector", subcommand, connector], url: url})
-       when subcommand in ~w(config delete info pause restart resume status) do
+       when subcommand in ~w(config delete info pause resume status) do
     apply(Kconnectex.Connectors, String.to_atom(subcommand), [client(url), connector])
     |> display()
   end

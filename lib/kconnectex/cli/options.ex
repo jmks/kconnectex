@@ -20,7 +20,15 @@ defmodule Kconnectex.CLI.Options do
 
   def parse(args, config \\ %{}) do
     global_flags = [cluster: :string, help: :boolean, url: :string]
-    command_flags = [errors_only: :boolean, expand: :string]
+    command_flags = [
+      # connectors
+      expand: :string,
+      # connector restart
+      only_failed: :boolean,
+      include_tasks: :boolean,
+      # plugin list
+      errors_only: :boolean,
+    ]
 
     {parsed, command, invalid} = OptionParser.parse(args, strict: global_flags ++ command_flags)
 
@@ -141,6 +149,24 @@ defmodule Kconnectex.CLI.Options do
 
       %{opts | command: command, options: [expand: expand]}
     end
+  end
+
+  defp with_command(opts, command = ["connector", "restart" | _], flags) do
+    only_failed? = Keyword.get(flags, :only_failed, false)
+    include_tasks? = Keyword.get(flags, :include_tasks, false)
+
+    new_options = opts.options
+    new_options = if only_failed?, do: Keyword.put(new_options, :only_failed, true), else: new_options
+    new_options = if include_tasks?, do: Keyword.put(new_options, :include_tasks, true), else: new_options
+
+    new_flags =
+      flags
+      |> Keyword.delete(:only_failed)
+      |> Keyword.delete(:include_tasks)
+
+    new_opts = invalid_flag_errors(opts, new_flags)
+
+    %{new_opts | command: command, options: new_options}
   end
 
   defp with_command(opts, ["plugin", "validate"] = command, flags) do

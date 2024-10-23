@@ -7,6 +7,47 @@ defmodule Kconnectex.Connectors do
 
   alias Kconnectex.Request
 
+  @doc """
+  Lists active connectors.
+
+  https://docs.confluent.io/platform/current/connect/references/restapi.html#get--connectors
+
+  ## Parameters
+
+  - client: client from `Kconnectex.client/1`
+
+  ## Options
+
+  - expand: either `:status`, `:info`, or a list of them: `[:info, :status]`
+
+  ## Examples
+
+  > Kconnectex.Connectors.list(client)
+
+  {:ok, ["debezium", "replicator"]}
+
+  > Kconnectex.Connectors.list(client, :status)
+
+  {:ok, %{
+    "debezium" => %{
+      "status" => %{
+        "name" => "debezium",
+        "connector" => {
+          "state" => "RUNNING",
+          "worker_id" => "10.0.0.162:8083"
+        },
+        "tasks": [
+          %{
+            "id" => 0,
+            "state" => "RUNNING",
+            "worker_id" => "10.0.0.162:8083"
+          }
+        ],
+        "type": "sink"
+      }
+    }
+  }}
+  """
   def list(client, options \\ []) do
     request_opts = process_expand(options)
 
@@ -46,9 +87,41 @@ defmodule Kconnectex.Connectors do
     |> Request.execute()
   end
 
-  def restart(client, connector) do
+  @doc """
+  Restarts a connector. Can optionally restart the connector's tasks or only those that are FAILED.
+
+  https://docs.confluent.io/platform/current/connect/references/restapi.html#post--connectors-(string-name)-restart
+
+  ## Parameters
+
+  - client: client from `Kconnectex.client/1`
+  - connector: the connector name
+
+  ## Options
+
+  - expand: either `:status`, `:info`, or a list of them: `[:info, :status]`
+
+  - include_tasks (boolean, default: false): also restart the tasks
+  - only_failed (boolean, default: false): only restart the connector (and optionally tasks) that are FAILED
+
+  ## Examples
+
+  > Kconnectex.Connectors.restart(client, "debezium")
+
+  :ok
+
+  > Kconnectex.Connectors.restart(client, "debezium", include_tasks: true, only_failed: true)
+
+  :ok
+  """
+  def restart(client, connector, options \\ []) do
+    opts =
+      options
+      |> process(:include_tasks, :exclude, :query)
+      |> process(:only_failed, :exclude, :query)
+
     request_with_connector(client, connector)
-    |> Request.post("/connectors/#{connector}/restart", "")
+    |> Request.post("/connectors/#{connector}/restart", "", opts)
     |> Request.execute()
   end
 
@@ -84,6 +157,18 @@ defmodule Kconnectex.Connectors do
       Keyword.put(new_opts, :query, expand)
     else
       new_opts
+    end
+  end
+
+  def process(options, opt, :exclude, :query) do
+    if Keyword.has_key?(options, opt) do
+      value = Keyword.fetch!(options, opt)
+
+      options
+      |> Keyword.delete(opt)
+      |> Keyword.update(:query, [{opt, value}], fn old -> Keyword.put(old, opt, value) end)
+    else
+      options
     end
   end
 

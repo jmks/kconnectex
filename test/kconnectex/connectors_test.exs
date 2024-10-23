@@ -164,6 +164,10 @@ defmodule Kconnectex.ConnectorsTest do
     assert {:error, :rebalancing} == Connectors.restart(client("409"), "debezium")
   end
 
+  test "POST /connectors/:connector/restart?includeTasks=true&onlyFailed=false" do
+    assert :ok == Connectors.restart(client(), "debezium", include_tasks: true, only_failed: false)
+  end
+
   @tag :integration
   test "create and update a connector" do
     import IntegrationHelpers
