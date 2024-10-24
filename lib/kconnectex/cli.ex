@@ -265,7 +265,7 @@ defmodule Kconnectex.CLI do
     end
   end
 
-  defp add_cluster(config, name, host, port \\ nil)
+  defp add_cluster(config, name, host, port \\ 8083)
 
   defp add_cluster(:no_configuration_file, _name, _host, _port) do
     # TODO: create the file?
@@ -273,8 +273,7 @@ defmodule Kconnectex.CLI do
   end
 
   defp add_cluster(config, name, host, port) do
-    cluster_config = extract_cluster_config(host, port)
-    new_config = put_in(config["clusters"][name], cluster_config)
+    new_config = put_in(config["clusters"][name], cluster_config(host, port))
 
     case ConfigFile.write(new_config) do
       :ok ->
@@ -286,16 +285,14 @@ defmodule Kconnectex.CLI do
     end
   end
 
-  defp extract_cluster_config(host, nil), do: %{"host" => host}
+  defp cluster_config(host, port) do
+    maybe_integer =
+      case Integer.parse(port) do
+        {int, ""} -> int
+        _ -> port
+      end
 
-  defp extract_cluster_config(host, port) do
-    case Integer.parse(port) do
-      {port, ""} ->
-        %{"host" => host, "port" => port}
-
-      :error ->
-        %{"host" => host, "port" => port}
-    end
+    %{"host" => host, "port" => maybe_integer}
   end
 
   defp display(:ok), do: IO.puts("Success")

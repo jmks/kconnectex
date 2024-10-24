@@ -2,7 +2,7 @@ defmodule Kconnectex.CLI.ConfigFile do
   @filename ".kconnectex.json"
 
   def read(filepath \\ :use_home_or_local) do
-    with {:ok, file} <- config_file(filepath),
+    with {:ok, file} <- config_filepath(filepath),
          true <- File.regular?(file),
          {:ok, contents} <- File.read(file),
          {:ok, json} <- Jason.decode(contents),
@@ -28,9 +28,11 @@ defmodule Kconnectex.CLI.ConfigFile do
   end
 
   def write(config, filepath \\ :use_home_or_local) do
+    config = Map.delete(config, :config_file_path)
+
     with {:ok, validated} <- validate_config(config),
          {:ok, json} <- Jason.encode(validated, pretty: true),
-         {:ok, file} <- config_file(filepath),
+         {:ok, file} <- config_filepath(filepath),
          {:ok, io} <- File.open(file, [:write]),
          :ok <- IO.write(io, json),
          :ok <- File.close(io) do
@@ -69,7 +71,7 @@ defmodule Kconnectex.CLI.ConfigFile do
     "cluster #{cluster} port must be an integer"
   end
 
-  defp config_file(:use_home_or_local) do
+  defp config_filepath(:use_home_or_local) do
     files = Enum.filter(default_files(), &File.regular?/1)
 
     if Enum.any?(files) do
@@ -79,7 +81,7 @@ defmodule Kconnectex.CLI.ConfigFile do
     end
   end
 
-  defp config_file(provided), do: {:ok, provided}
+  defp config_filepath(provided), do: {:ok, provided}
 
   defp default_files do
     [System.user_home(), File.cwd!()]

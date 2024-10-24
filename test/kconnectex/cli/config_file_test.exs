@@ -24,7 +24,9 @@ defmodule Kconnectex.CLI.ConfigFileTest do
     end
 
     test "errors when configuration file is missing" do
-      assert {:error, :no_configuration_file} = ConfigFile.read(fixture("config/nonexistant_file.json"))
+      assert {:error, :no_configuration_file} =
+               ConfigFile.read(fixture("config/nonexistant_file.json"))
+
       error = ConfigFile.format_error(:no_configuration_file)
 
       assert String.contains?(error, "Could not find configuration file")
@@ -88,6 +90,15 @@ defmodule Kconnectex.CLI.ConfigFileTest do
 
       assert {:error, reason} = ConfigFile.write(config, filepath)
       assert reason == {:missing_host, "local"}
+    end
+
+    test "does not include :config_file_path", %{tmp_dir: dir, valid_config: config} do
+      filepath = Path.join([dir, "serialized.json"])
+
+      assert :ok = ConfigFile.write(config, filepath)
+      config_from_file = filepath |> File.read!() |> Jason.decode!()
+
+      refute Map.has_key?(config_from_file, :config_file_path)
     end
   end
 
