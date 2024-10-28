@@ -75,6 +75,24 @@ defmodule Kconnectex.ConnectorsTest do
     def call(%{method: :put, url: "localhost/connectors/debezium/resume"}, _) do
       {:ok, %Tesla.Env{status: 202, body: ""}}
     end
+
+    def call(%{method: :get, url: "localhost/connectors/snowflake/offsets"}, _) do
+      body = %{
+        "offsets" => [
+          %{
+            "partition" => %{
+              "kafka_topic" => "table_1",
+              "kafka_partition" => 0
+            },
+            "offset" => %{
+              "kafka_offset" => 123
+            }
+          }
+        ]
+      }
+
+      {:ok, %Tesla.Env{status: 200, body: body}}
+    end
   end
 
   test "GET /connectors" do
@@ -165,7 +183,8 @@ defmodule Kconnectex.ConnectorsTest do
   end
 
   test "POST /connectors/:connector/restart?includeTasks=true&onlyFailed=false" do
-    assert :ok == Connectors.restart(client(), "debezium", include_tasks: true, only_failed: false)
+    assert :ok ==
+             Connectors.restart(client(), "debezium", include_tasks: true, only_failed: false)
   end
 
   @tag :integration
@@ -228,6 +247,12 @@ defmodule Kconnectex.ConnectorsTest do
 
   test "PUT /connectors/:connector/resume" do
     assert :ok == Connectors.resume(client(), "debezium")
+  end
+
+  test "GET /connectors/:connector/offsets" do
+    assert {:ok, offsets} = Connectors.offsets(client(), "snowflake")
+
+    assert Map.has_key?(offsets, "offsets")
   end
 
   defp client(base_url \\ "localhost") do

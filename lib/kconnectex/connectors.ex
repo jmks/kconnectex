@@ -143,6 +143,60 @@ defmodule Kconnectex.Connectors do
     |> Request.execute()
   end
 
+  @doc """
+  Get the current offsets for a connector. Note that the connector must exist.
+
+  https://docs.confluent.io/platform/current/connect/references/restapi.html#get--connectors-connector-offsets
+
+  ## Parameters
+
+  - client: client from `Kconnectex.client/1`
+  - connector: the connector name
+
+  """
+  def offsets(client, connector) do
+    request_with_connector(client, connector)
+    |> Request.get("/connectors/#{connector}/offsets")
+    |> Request.execute()
+  end
+
+  @doc """
+  Alter the offsets for a connector. Note that the connector must exist and be STOPPED.
+
+  Setting an offset to `nil` will reset the offset for that partition.
+
+  https://docs.confluent.io/platform/current/connect/references/restapi.html#patch--connectors-connector-offsets
+
+  ## Parameters
+
+  - client: client from `Kconnectex.client/1`
+  - connector: the connector name
+  - offsets: values to update offsets to. Should be formatted like `offsets/2` returns.
+
+  """
+  def offsets(client, connector, offsets) when is_map(offsets) do
+    request_with_connector(client, connector)
+    |> Request.patch("/connectors/#{connector}/offsets", offsets)
+    |> Request.execute()
+  end
+
+  @doc """
+  Reset the offsets for a connector. Note that the connector must exist and be STOPPED.
+
+  https://docs.confluent.io/platform/current/connect/references/restapi.html#delete--connectors-connector-offsets
+
+  ## Parameters
+
+  - client: client from `Kconnectex.client/1`
+  - connector: the connector name
+
+  """
+  def reset_offsets(client, connector) do
+    request_with_connector(client, connector)
+    |> Request.delete("/connectors/#{connector}/offsets")
+    |> Request.execute()
+  end
+
   defp process_expand(opts) do
     expand = Keyword.get(opts, :expand, [])
     expand = if is_atom(expand) do
@@ -160,7 +214,7 @@ defmodule Kconnectex.Connectors do
     end
   end
 
-  def process(options, opt, :exclude, :query) do
+  defp process(options, opt, :exclude, :query) do
     if Keyword.has_key?(options, opt) do
       value = Keyword.fetch!(options, opt)
 

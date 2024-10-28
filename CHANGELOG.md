@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* (client) Add `Connectors.offsets` and `Connectors.reset_offsets/2`
 * (cli) Add `connector restart` options `--include-tasks` and `--only-failed`
 * (client) Add `includeTasks` and `onlyFailed` options to `Connectors.restart/3`
 

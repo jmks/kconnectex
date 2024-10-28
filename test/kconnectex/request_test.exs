@@ -71,6 +71,12 @@ defmodule Kconnectex.RequestTest do
       assert req.mfa == {Tesla, :post, ["http://example.com", "body", [query: [a: 1]]]}
     end
 
+    test "patch" do
+      req = Request.new(client()) |> Request.patch("http://example.com", "body")
+
+      assert req.mfa == {Tesla, :patch, ["http://example.com", "body"]}
+    end
+
     test "put" do
       req = Request.new(client()) |> Request.put("http://example.com", "body")
 
