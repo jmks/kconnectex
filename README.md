@@ -85,7 +85,9 @@ $ mix test --include integration
 
 You permission to push to the Docker repository (currently, just the author).
 
-A script will release the CLI with a tag of the current version: `./release`
+First, log in with quay.io: `docker login quay.io`
+
+Then run the release script: `./release`
 
 ## Installation
 
@@ -105,7 +107,7 @@ by adding `kconnectex` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:kconnectex, "~> 0.2.0"}
+    {:kconnectex, "~> 0.3.1"}
   ]
 end
 ```
