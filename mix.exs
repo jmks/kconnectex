@@ -5,7 +5,7 @@ defmodule Kconnectex.MixProject do
     [
       app: :kconnectex,
       version: "0.3.0",
-      elixir: "~> 1.10",
+      elixir: "~> 1.18",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       escript: escript()
@@ -28,7 +28,9 @@ defmodule Kconnectex.MixProject do
 
       {:tesla, "~> 1.4.0"},
       {:hackney, "~> 1.16.0"},
-      {:jason, ">= 1.0.0"}
+      {:jason, ">= 1.0.0"},
+      # https://github.com/deadtrickster/ssl_verify_fun.erl/pull/27
+      {:ssl_verify_fun, ">= 0.0.0", manager: :rebar3, override: true}
     ]
   end
 
