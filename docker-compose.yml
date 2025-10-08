@@ -1,5 +1,4 @@
 services:
-  # TODO: volume
   kconnectex_kafka:
     image: "confluentinc/cp-kafka:7.7.5"
     ports:
@@ -21,6 +20,8 @@ services:
       interval: "5s"
       timeout: "5s"
       retries: 12
+    volumes:
+      - kconnectex_kafka_data:/var/lib/kafka/data
   kconnectex_kafkaconnect:
     image: "quay.io/debezium/connect-base:3.2.3"
     ports:
@@ -41,3 +42,5 @@ services:
       interval: "5s"
       timeout: "5s"
       retries: 12
+volumes:
+  kconnectex_kafka_data:
