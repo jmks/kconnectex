@@ -95,9 +95,19 @@ defmodule Kconnectex.CLI do
     end
   end
 
-  defp run(%{command: ["cluster"], url: url}) do
+  defp run(%{command: ["cluster"]} = opts) do
+    run(Map.put(opts, :command, ["cluster", "info"]))
+  end
+
+  defp run(%{command: ["cluster", "info"], url: url}) do
     client(url)
     |> Kconnectex.Cluster.info()
+    |> display()
+  end
+
+  defp run(%{command: ["cluster", "health"], url: url}) do
+    client(url)
+    |> Kconnectex.Cluster.health()
     |> display()
   end
 
