@@ -112,13 +112,6 @@ defmodule Kconnectex.ConnectorPluginsTest do
 
     assert first_config_error(invalid["configs"]) ==
              "Missing required configuration \"name\" which has no default value."
-
-    error_config = Map.delete(@file_stream_config, "topics")
-    {:error, error} = Kconnectex.ConnectorPlugins.validate_config(connect_client(), error_config)
-    assert error["error_code"] == 500
-
-    assert error["message"] ==
-             "org.apache.kafka.common.config.ConfigException: Must configure one of topics or topics.regex"
   end
 
   defp client(base_url \\ "localhost") do

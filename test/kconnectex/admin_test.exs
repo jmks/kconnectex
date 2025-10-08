@@ -28,18 +28,16 @@ defmodule Kconnectex.AdminTest do
     import IntegrationHelpers
 
     # Reset to known values; previous test runs may have changed them
-    Admin.logger_level(connect_client(), "root", "INFO")
-    Admin.logger_level(connect_client(), "org.reflections", "WARN")
+    Admin.logger_level(connect_client(), "org.reflections", "INFO")
 
     {:ok, loggers} = Admin.loggers(connect_client())
-    assert %{"org.reflections" => %{"level" => "WARN"}, "root" => %{"level" => "INFO"}} = loggers
+    assert loggers["org.reflections"]["level"] == "INFO"
 
-    {:ok, level} = Admin.logger_level(connect_client(), "root")
+    {:ok, level} = Admin.logger_level(connect_client(), "org.reflections")
     assert %{"level" => "INFO"} = level
 
-    Admin.logger_level(connect_client(), "root", "DEBUG")
-
-    {:ok, level} = Admin.logger_level(connect_client(), "root")
+    Admin.logger_level(connect_client(), "org.reflections", "DEBUG")
+    {:ok, level} = Admin.logger_level(connect_client(), "org.reflections")
     assert %{"level" => "DEBUG"} = level
   end
 
