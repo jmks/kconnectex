@@ -30,7 +30,7 @@ defmodule Kconnectex.CLI.Help do
     IO.puts("""
     #{help_header()}
 
-    cluster
+    info
       Display information about Kafka Connect cluster
     """)
   end
