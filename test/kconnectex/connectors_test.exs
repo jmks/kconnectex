@@ -194,7 +194,7 @@ defmodule Kconnectex.ConnectorsTest do
     delete_existing_connectors(connect_client(), ["license-stream"])
 
     bad_config = %{
-      "file" => "/kafka/LICENSE",
+      "file" => "/usr/share/doc/kafka/LICENSE",
       "topic" => "license-stream",
       "name" => "license-stream"
     }
@@ -218,7 +218,7 @@ defmodule Kconnectex.ConnectorsTest do
     assert Map.has_key?(info, "config")
     assert Map.has_key?(info, "tasks")
 
-    new_config = Map.put(good_config, "file", "/kafka/NOTICE")
+    new_config = Map.put(good_config, "file", "/usr/share/doc/kafka/NOTICE")
     {:ok, response} = Connectors.update(connect_client(), "license-stream", new_config)
     assert Map.has_key?(response, "config")
     assert Map.has_key?(response, "tasks")
