@@ -23,17 +23,22 @@ services:
     volumes:
       - kconnectex_kafka_data:/var/lib/kafka/data
   kconnectex_kafkaconnect:
-    image: "quay.io/debezium/connect-base:3.2.3"
+    image: "confluentinc/cp-kafka-connect:7.7.5"
     ports:
       - 8083:8083
     environment:
-      BOOTSTRAP_SERVERS: "kconnectex_kafka:9092"
-      CONFIG_STORAGE_TOPIC: "_kconnectex_config"
+      CONNECT_GROUP_ID: "1"
+      CONNECT_BOOTSTRAP_SERVERS: "kconnectex_kafka:9092"
+      CONNECT_CONFIG_STORAGE_TOPIC: "_kconnectex_config"
       CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
-      OFFSET_STORAGE_TOPIC: "_kconnectex_offsets"
+      CONNECT_OFFSET_STORAGE_TOPIC: "_kconnectex_offsets"
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
-      STATUS_STORAGE_TOPIC: "_kconnectex_status"
+      CONNECT_STATUS_STORAGE_TOPIC: "_kconnectex_status"
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "localhost"
+      CONNECT_PLUGIN_PATH: "${CONNECT_PLUGIN_PATH},/usr/share/filestream-connectors"
     depends_on:
       kconnectex_kafka:
         condition: "service_healthy"
