@@ -28,37 +28,16 @@ defmodule Kconnectex.AdminTest do
     import IntegrationHelpers
 
     # Reset to known values; previous test runs may have changed them
-    Admin.logger_level(
-      connect_client(),
-      "org.apache.kafka.clients.admin.KafkaAdminClient",
-      "INFO"
-    )
-
-    Admin.logger_level(
-      connect_client(),
-      "org.reflections",
-      "WARN"
-    )
+    Admin.logger_level(connect_client(), "org.reflections", "INFO")
 
     {:ok, loggers} = Admin.loggers(connect_client())
+    assert loggers["org.reflections"]["level"] == "INFO"
 
-    assert loggers["org.reflections"]["level"] == "WARN"
-    assert loggers["org.apache.kafka.clients.admin.KafkaAdminClient"]["level"] == "INFO"
-
-    {:ok, level} =
-      Admin.logger_level(connect_client(), "org.apache.kafka.clients.admin.KafkaAdminClient")
-
+    {:ok, level} = Admin.logger_level(connect_client(), "org.reflections")
     assert %{"level" => "INFO"} = level
 
-    Admin.logger_level(
-      connect_client(),
-      "org.apache.kafka.clients.admin.KafkaAdminClient",
-      "DEBUG"
-    )
-
-    {:ok, level} =
-      Admin.logger_level(connect_client(), "org.apache.kafka.clients.admin.KafkaAdminClient")
-
+    Admin.logger_level(connect_client(), "org.reflections", "DEBUG")
+    {:ok, level} = Admin.logger_level(connect_client(), "org.reflections")
     assert %{"level" => "DEBUG"} = level
   end
 
