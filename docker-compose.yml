@@ -1,6 +1,6 @@
 services:
   kconnectex_kafka:
-    image: "confluentinc/cp-kafka:7.7.5"
+    image: "confluentinc/cp-kafka:8.0.1"
     ports:
       - 9092:9092
       - 29092:29092
@@ -23,7 +23,7 @@ services:
     volumes:
       - kconnectex_kafka_data:/var/lib/kafka/data
   kconnectex_kafkaconnect:
-    image: "confluentinc/cp-kafka-connect:7.7.5"
+    image: "confluentinc/cp-kafka-connect:8.0.1"
     ports:
       - 8083:8083
     environment:

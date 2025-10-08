@@ -27,6 +27,19 @@ defmodule Kconnectex.ClusterTest do
     assert Map.has_key?(cluster_info, "kafka_cluster_id")
   end
 
+  @tag :integration
+  test "GET /health" do
+    import IntegrationHelpers
+
+    assert Cluster.health(Kconnectex.client("http://0.0.0.0:9999")) ==
+    {:error, :econnrefused}
+
+    {:ok, health} = Cluster.health(connect_client())
+
+    assert health["status"] == "healthy"
+    assert health["message"] == "Worker has completed startup and is ready to handle requests."
+  end
+
   defp client(base_url) do
     Kconnectex.client(base_url, FakeAdapter)
   end

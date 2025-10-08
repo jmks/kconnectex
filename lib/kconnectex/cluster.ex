@@ -30,4 +30,27 @@ defmodule Kconnectex.Cluster do
     |> Request.get("/")
     |> Request.execute()
   end
+
+  @doc """
+  Health of Kafka Connect
+
+  ## Parameters
+
+  - client: client from `Kconnectex.client/1`
+
+  ## Examples
+
+  > Kconnectex.Cluster.health(client)
+
+  {:ok,
+  %{
+    "status" => "healthy",
+    "message" => "Worker has completed startup and is ready to handle requests."
+  }}
+  """
+  def health(client) do
+    Request.new(client)
+    |> Request.get("/health")
+    |> Request.execute()
+  end
 end
