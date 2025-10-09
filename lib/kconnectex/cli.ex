@@ -234,10 +234,9 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
-  defp run(%{command: ["connector", "status", connector], url: url}) do
+  defp run(%{command: ["connector", "status", connector], url: url, format: :text}) do
     case Kconnectex.Connectors.status(client(url), connector) do
       {:ok, status} ->
-        # TODO: add --json option
         status
         |> Kconnectex.CLI.Commands.Connectors.render()
         |> IO.puts()
