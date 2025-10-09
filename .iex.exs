@@ -7,7 +7,7 @@ defmodule Helpers.Config do
   Some helper functions for configuring connectors
   """
 
-  def filestream(topic \\ "license-stream", file \\ "/kafka/LICENSE") do
+  def filestream(topic \\ "license-stream", file \\ "/usr/share/doc/kafka/LICENSE") do
     %{
       "connector.class" => "FileStreamSource",
       "topic" => topic,

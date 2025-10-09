@@ -24,7 +24,7 @@ defmodule Kconnectex.Tasks do
          %{
            "config" => %{
              "batch.size" => "2000",
-             "file" => "/kafka/LICENCE",
+             "file" => "/usr/share/doc/kafka/LICENSE",
              "task.class" => "org.apache.kafka.connect.file.FileStreamSourceTask",
              "topic" => "license-lines"
            },
