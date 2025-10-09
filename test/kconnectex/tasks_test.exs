@@ -10,7 +10,7 @@ defmodule Kconnectex.TasksTest do
           "id" => %{"connector" => "filestream", "task" => 0},
           "config" => %{
             "batch.size" => "2000",
-            "file" => "/kafka/LICENSE",
+            "file" => "/usr/share/doc/kafka/LICENSE",
             "task.class" => "org.apache.kafka.connect.file.FileStreamSourceTask",
             "topic" => "license-stream"
           }

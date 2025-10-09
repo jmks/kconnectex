@@ -111,7 +111,7 @@ defmodule Kconnectex.RequestTest do
 
     valid_config = %{
       "connector.class" => "org.apache.kafka.connect.file.FileStreamSinkConnector",
-      "file" => "/kafka/LICENSE",
+      "file" => "/usr/share/doc/kafka/LICENSE",
       "topics" => "license-stream",
       "name" => "license-stream"
     }

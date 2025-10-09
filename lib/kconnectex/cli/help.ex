@@ -30,8 +30,11 @@ defmodule Kconnectex.CLI.Help do
     IO.puts("""
     #{help_header()}
 
-    cluster
+    info
       Display information about Kafka Connect cluster
+
+    health
+      Display the health of the Kafka Connect cluster
     """)
   end
 
