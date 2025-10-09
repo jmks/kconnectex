@@ -234,6 +234,19 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
+  defp run(%{command: ["connector", "status", connector], url: url}) do
+    case Kconnectex.Connectors.status(client(url), connector) do
+      {:ok, status} ->
+        # TODO: add --json option
+        status
+        |> Kconnectex.CLI.Commands.Connectors.render()
+        |> IO.puts()
+
+      otherwise ->
+        display(otherwise)
+    end
+  end
+
   defp run(%{command: ["connector", subcommand, connector], url: url})
        when subcommand in ~w(config delete info pause resume status) do
     apply(Kconnectex.Connectors, String.to_atom(subcommand), [client(url), connector])
