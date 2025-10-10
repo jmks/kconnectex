@@ -26,7 +26,7 @@ defmodule Kconnectex.Connectors do
 
   {:ok, ["debezium", "replicator"]}
 
-  > Kconnectex.Connectors.list(client, :status)
+  > Kconnectex.Connectors.list(client, expand: :status)
 
   {:ok, %{
     "debezium" => %{
@@ -98,8 +98,6 @@ defmodule Kconnectex.Connectors do
   - connector: the connector name
 
   ## Options
-
-  - expand: either `:status`, `:info`, or a list of them: `[:info, :status]`
 
   - include_tasks (boolean, default: false): also restart the tasks
   - only_failed (boolean, default: false): only restart the connector (and optionally tasks) that are FAILED
