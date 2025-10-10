@@ -89,7 +89,15 @@ defmodule Kconnectex.CLI.OptionsTest do
     end
 
     test "connector restart :name --only-failed" do
-      opts = Options.parse(["--url", "example.com", "connector", "restart", "debezium", "--only-failed"])
+      opts =
+        Options.parse([
+          "--url",
+          "example.com",
+          "connector",
+          "restart",
+          "debezium",
+          "--only-failed"
+        ])
 
       assert Enum.empty?(opts.errors)
       assert opts.command == ["connector", "restart", "debezium"]
@@ -97,7 +105,15 @@ defmodule Kconnectex.CLI.OptionsTest do
     end
 
     test "connector restart :name --include-tasks" do
-      opts = Options.parse(["--url", "example.com", "connector", "restart", "debezium", "--include-tasks"])
+      opts =
+        Options.parse([
+          "--url",
+          "example.com",
+          "connector",
+          "restart",
+          "debezium",
+          "--include-tasks"
+        ])
 
       assert Enum.empty?(opts.errors)
       assert opts.command == ["connector", "restart", "debezium"]
@@ -105,7 +121,16 @@ defmodule Kconnectex.CLI.OptionsTest do
     end
 
     test "connector restart :name --only-failed --include-tasks" do
-      opts = Options.parse(["--url", "example.com", "connector", "restart", "debezium", "--include-tasks", "--only-failed"])
+      opts =
+        Options.parse([
+          "--url",
+          "example.com",
+          "connector",
+          "restart",
+          "debezium",
+          "--include-tasks",
+          "--only-failed"
+        ])
 
       assert Enum.empty?(opts.errors)
       assert opts.command == ["connector", "restart", "debezium"]

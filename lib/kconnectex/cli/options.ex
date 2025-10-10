@@ -20,6 +20,7 @@ defmodule Kconnectex.CLI.Options do
 
   def parse(args, config \\ %{}) do
     global_flags = [cluster: :string, help: :boolean, url: :string, json: :boolean]
+
     command_flags = [
       # connectors
       expand: :string,
@@ -32,7 +33,7 @@ defmodule Kconnectex.CLI.Options do
 
     %__MODULE__{
       help?: Keyword.get(parsed, :help, false),
-      format: (if Keyword.get(parsed, :json, false), do: :json, else: :text),
+      format: if(Keyword.get(parsed, :json, false), do: :json, else: :text),
       config: config
     }
     |> with_command(command, extract_flags(parsed, command_flags))
@@ -155,8 +156,12 @@ defmodule Kconnectex.CLI.Options do
     include_tasks? = Keyword.get(flags, :include_tasks, false)
 
     new_options = opts.options
-    new_options = if only_failed?, do: Keyword.put(new_options, :only_failed, true), else: new_options
-    new_options = if include_tasks?, do: Keyword.put(new_options, :include_tasks, true), else: new_options
+
+    new_options =
+      if only_failed?, do: Keyword.put(new_options, :only_failed, true), else: new_options
+
+    new_options =
+      if include_tasks?, do: Keyword.put(new_options, :include_tasks, true), else: new_options
 
     new_flags =
       flags

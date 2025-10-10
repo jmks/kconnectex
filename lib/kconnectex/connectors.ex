@@ -197,11 +197,13 @@ defmodule Kconnectex.Connectors do
 
   defp process_expand(opts) do
     expand = Keyword.get(opts, :expand, [])
-    expand = if is_atom(expand) do
-      [expand: expand]
-    else
-      Enum.map(expand, fn opt -> {:expand, opt} end)
-    end
+
+    expand =
+      if is_atom(expand) do
+        [expand: expand]
+      else
+        Enum.map(expand, fn opt -> {:expand, opt} end)
+      end
 
     new_opts = Keyword.delete(opts, :expand)
 
