@@ -2,7 +2,16 @@ defmodule Kconnectex.CLI.Options do
   alias Kconnectex.CLI.ConfigFile
 
   @enforce_keys [:config]
-  defstruct [:config, url: :unset, help?: false, format: :text, command: [], options: [], errors: []]
+  defstruct [
+    :config,
+    url: :unset,
+    help?: false,
+    format: :text,
+    watch?: false,
+    command: [],
+    options: [],
+    errors: []
+  ]
 
   def extract(args) do
     case ConfigFile.read() do
@@ -24,6 +33,8 @@ defmodule Kconnectex.CLI.Options do
     command_flags = [
       # connectors
       expand: :string,
+      # connector status
+      watch: :boolean,
       # connector restart
       only_failed: :boolean,
       include_tasks: :boolean,
@@ -34,6 +45,7 @@ defmodule Kconnectex.CLI.Options do
     %__MODULE__{
       help?: Keyword.get(parsed, :help, false),
       format: if(Keyword.get(parsed, :json, false), do: :json, else: :text),
+      watch?: Keyword.get(parsed, :watch, false),
       config: config
     }
     |> with_command(command, extract_flags(parsed, command_flags))

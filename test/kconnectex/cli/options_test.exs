@@ -49,6 +49,14 @@ defmodule Kconnectex.CLI.OptionsTest do
       assert opts.command == ["cluster", "info"]
       assert opts.errors == []
     end
+
+    test "--watch is false by default" do
+      refute Options.parse([]).watch?
+    end
+
+    test "--watch" do
+      assert Options.parse(["--watch"]).watch?
+    end
   end
 
   describe "connectors" do
