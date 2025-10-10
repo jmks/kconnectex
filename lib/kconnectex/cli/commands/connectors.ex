@@ -1,31 +1,34 @@
 defmodule Kconnectex.CLI.Commands.Connectors do
-  def render(status) do
-    tasks =
-      Enum.flat_map(status["tasks"], fn task ->
-        state = "Task #{task["id"]}: #{task["state"]}"
+  alias TableRex.Table
 
-        if Map.has_key?(task, "trace") do
-          formatted = String.split(task["trace"], "\n", trim: true)
-          trace = ["Trace:", join(formatted)]
-
-          [state | trace]
-        else
-          [state]
-        end
-      end)
-
-    join([
+  def extract(status) do
+    connector = [
       status["name"],
-      String.duplicate("-", String.length(status["name"])),
-      "Connector: " <> status["connector"]["state"]
-      | tasks
-    ])
+      "CONNECTOR",
+      nil,
+      status["connector"]["worker_id"],
+      status["connector"]["state"]
+    ]
+
+    tasks =
+      for task <- status["tasks"] do
+        [status["name"], "TASK", task["id"], task["worker_id"], task["state"]]
+      end
+
+    [connector | tasks]
   end
 
-  defp join(list, sep \\ "\n") do
-    binary =
-      list |> Enum.intersperse(sep) |> :erlang.iolist_to_binary()
+  def render(status_rows) do
+    # TODO: how to show the trace?
+    Table.new(status_rows, headers())
+    |> Table.render!(
+      horizontal_style: :off,
+      vertical_style: :off,
+      top_frame_symbol: false
+    )
+  end
 
-    binary <> sep
+  defp headers do
+    ["CONNECTOR", "TYPE", "ID", "WORKER_ID", "STATE"]
   end
 end

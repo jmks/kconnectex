@@ -236,6 +236,7 @@ defmodule Kconnectex.CLI do
     case Kconnectex.Connectors.status(client(url), connector) do
       {:ok, status} ->
         status
+        |> Kconnectex.CLI.Commands.Connectors.extract()
         |> Kconnectex.CLI.Commands.Connectors.render()
         |> IO.puts()
 
