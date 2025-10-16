@@ -373,7 +373,7 @@ defmodule Kconnectex.CLI do
   end
 
   defp read_stdin do
-    IO.read(:stdio, :all)
+    IO.read(:stdio, :eof)
     |> String.trim()
     |> Jason.decode()
   end
