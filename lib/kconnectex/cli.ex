@@ -135,15 +135,13 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
-  defp run(%{command: ["plugin", "validate"], options: options, url: url}) do
+  defp run(options = %{command: ["plugin", "validate"], url: url}) do
     case read_stdin() do
       {:ok, json} ->
-        result = client(url) |> Kconnectex.ConnectorPlugins.validate_config(json)
-
-        result =
-          if Keyword.get(options, :errors_only, false), do: extract_errors(result), else: result
-
-        display(result)
+        client(url)
+        |> Kconnectex.ConnectorPlugins.validate_config(json)
+        |> extract_errors(options)
+        |> display()
 
       {:error, err} ->
         display_errors([Jason.DecodeError.message(err)])
@@ -319,6 +317,10 @@ defmodule Kconnectex.CLI do
 
   defp display(:ok), do: IO.puts("Success")
 
+  defp display({:text, lines}) do
+    Enum.each(lines, &IO.puts/1)
+  end
+
   defp display({:ok, result}) do
     result
     |> Jason.encode!(pretty: true)
@@ -373,19 +375,40 @@ defmodule Kconnectex.CLI do
   end
 
   defp read_stdin do
-    IO.read(:stdio, :all)
+    IO.read(:stdio, :eof)
     |> String.trim()
     |> Jason.decode()
   end
 
-  defp extract_errors({:error, reason}), do: {:error, reason}
+  defp extract_errors({:error, reason}, _options), do: {:error, reason}
 
-  defp extract_errors({:ok, result}) do
-    errors =
+  defp extract_errors({:ok, result}, %{format: :text}) do
+    configs_with_error =
       Enum.filter(result["configs"], fn config ->
         Enum.any?(get_in(config, ["value", "errors"]))
       end)
 
-    {:ok, errors}
+    if Enum.any?(configs_with_error) do
+      name_errors = Enum.flat_map(configs_with_error, fn config ->
+        Enum.map(config["value"]["errors"], fn error ->
+          [config["value"]["name"], error]
+        end)
+      end)
+
+      # TODO: Table?
+      table = [["CONFIG", "ERROR"] | name_errors]
+      width = table |> Enum.map(&hd/1) |> Enum.map(&String.length/1) |> Enum.max()
+      formatted = Enum.map(table, fn [name, error] ->
+        String.pad_trailing(name, width + 3) <> error
+      end)
+
+      {:text, formatted}
+    else
+      {:ok, "No errors"}
+    end
+  end
+
+  defp extract_errors({:ok, result}, _options) do
+    {:ok, result}
   end
 end

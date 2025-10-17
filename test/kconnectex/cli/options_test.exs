@@ -49,23 +49,6 @@ defmodule Kconnectex.CLI.OptionsTest do
       assert opts.command == ["cluster", "info"]
       assert opts.errors == []
     end
-
-    test "plugin validate --errors-only" do
-      opts = Options.parse(["--url", "example.com", "plugin", "validate", "--errors-only"])
-
-      assert {:errors_only, true} in opts.options
-      assert Enum.empty?(opts.errors)
-    end
-
-    test "--errors-only invalid for other commands" do
-      opts = Options.parse(["--url", "example.com", "plugin", "validate", "--errors-only"])
-
-      assert {:errors_only, true} in opts.options
-
-      opts = Options.parse(["--url", "example.com", "connectors", "--errors-only"])
-
-      assert "Unknown flag: --errors-only" in opts.errors
-    end
   end
 
   describe "connectors" do
