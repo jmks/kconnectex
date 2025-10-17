@@ -34,9 +34,10 @@ Can be `:info`, `:status`, or both as `[:info, :status]`.
 
 Can be a comma-separated list of values for `:expand` in `Connectors.list/2`.
 
-* (cli) Add `--errors-only` option to `plugin validate`
+* (cli) Add `--json` option to `plugin validate`
 
-This will only configs that have an error present.
+By default, now shows a table of configuration errors. The `--json` flag will
+show the fulll JSON response.
 
 ### Fixed
 

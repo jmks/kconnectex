@@ -408,16 +408,7 @@ defmodule Kconnectex.CLI do
     end
   end
 
-  defp extract_errors({:ok, result}, opts) do
-    if Keyword.get(opts.options, :errors_only, false) do
-      configs_with_error =
-        Enum.filter(result["configs"], fn config ->
-          Enum.any?(get_in(config, ["value", "errors"]))
-        end)
-
-      {:ok, configs_with_error}
-    else
-      {:ok, result}
-    end
+  defp extract_errors({:ok, result}, _options) do
+    {:ok, result}
   end
 end

@@ -26,8 +26,6 @@ defmodule Kconnectex.CLI.Options do
       # connector restart
       only_failed: :boolean,
       include_tasks: :boolean,
-      # plugin list
-      errors_only: :boolean,
     ]
 
     {parsed, command, invalid} = OptionParser.parse(args, strict: global_flags ++ command_flags)
@@ -168,12 +166,6 @@ defmodule Kconnectex.CLI.Options do
     new_opts = invalid_flag_errors(opts, new_flags)
 
     %{new_opts | command: command, options: new_options}
-  end
-
-  defp with_command(opts, ["plugin", "validate"] = command, flags) do
-    errors_only = Keyword.get(flags, :errors_only, false)
-
-    %{opts | command: command, options: [errors_only: errors_only]}
   end
 
   defp with_command(opts, command, flags) do
