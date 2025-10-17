@@ -30,8 +30,7 @@ defmodule Kconnectex.MixProject do
       {:hackney, "~> 1.21.0"},
       {:jason, ">= 1.0.0"},
       # https://github.com/deadtrickster/ssl_verify_fun.erl/pull/27
-      {:ssl_verify_fun, ">= 0.0.0", manager: :rebar3, override: true},
-      {:table_rex, "~> 4.1"}
+      {:ssl_verify_fun, ">= 0.0.0", manager: :rebar3, override: true}
     ]
   end
 
