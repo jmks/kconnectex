@@ -1,31 +1,33 @@
 defmodule Kconnectex.CLI.Commands.Connectors do
-  alias TableRex.Table
+  alias Kconnectex.Cli.Table
 
   def extract(status) do
     connector = [
       status["name"],
       "CONNECTOR",
-      nil,
+      "",
       status["connector"]["worker_id"],
       status["connector"]["state"]
     ]
 
-    tasks =
-      for task <- status["tasks"] do
-        [status["name"], "TASK", task["id"], task["worker_id"], task["state"]]
-      end
+    task_rows = Enum.flat_map(status["tasks"], fn task ->
+      task_row = [status["name"], "TASK", to_string(task["id"]), task["worker_id"], task["state"]]
 
-    [connector | tasks]
+      if Map.has_key?(task, "trace") do
+        trace = String.split(task["trace"], "\n")
+
+        [task_row | [{:lines, trace}]]
+      else
+        [task_row]
+      end
+    end)
+
+    [connector | task_rows]
   end
 
-  def render(status_rows) do
-    # TODO: how to show the trace?
-    Table.new(status_rows, headers())
-    |> Table.render!(
-      horizontal_style: :off,
-      vertical_style: :off,
-      top_frame_symbol: false
-    )
+  def render(status_rows, _opts \\ []) do
+    Table.new(headers(), status_rows)
+    |> Table.render()
   end
 
   defp headers do

@@ -1,4 +1,4 @@
-defmodule Kconnectex.Cli.Commands.ConnectorsTest do
+defmodule Kconnectex.CLI.Commands.ConnectorsTest do
   use ExUnit.Case, async: true
 
   alias Kconnectex.CLI.Commands.Connectors
@@ -8,9 +8,8 @@ defmodule Kconnectex.Cli.Commands.ConnectorsTest do
       status = connector("NAME", "RUNNING")
 
       assert render(status) == """
-              CONNECTOR   TYPE        ID   WORKER_ID   STATE
-
-              NAME        CONNECTOR        localhost   RUNNING
+             CONNECTOR   TYPE        ID   WORKER_ID   STATE
+             NAME        CONNECTOR        localhost   RUNNING
              """
     end
 
@@ -25,12 +24,11 @@ defmodule Kconnectex.Cli.Commands.ConnectorsTest do
         )
 
       assert render(status) == """
-              CONNECTOR   TYPE        ID   WORKER_ID   STATE
-
-              NAME        CONNECTOR        localhost   RUNNING
-              NAME        TASK        0    localhost   PAUSED
-              NAME        TASK        1    localhost   STOPPED
-              NAME        TASK        2    localhost   RUNNING
+             CONNECTOR   TYPE        ID   WORKER_ID   STATE
+             NAME        CONNECTOR        localhost   RUNNING
+             NAME        TASK        0    localhost   PAUSED
+             NAME        TASK        1    localhost   STOPPED
+             NAME        TASK        2    localhost   RUNNING
              """
     end
 
@@ -48,12 +46,14 @@ defmodule Kconnectex.Cli.Commands.ConnectorsTest do
         )
 
       assert render(status) == """
-              CONNECTOR   TYPE        ID   WORKER_ID   STATE
-
-              NAME        CONNECTOR        localhost   RUNNING
-              NAME        TASK        0    localhost   PAUSED
-              NAME        TASK        1    localhost   ERROR
-              NAME        TASK        2    localhost   RUNNING
+             CONNECTOR   TYPE        ID   WORKER_ID   STATE
+             NAME        CONNECTOR        localhost   RUNNING
+             NAME        TASK        0    localhost   PAUSED
+             NAME        TASK        1    localhost   ERROR
+             com.some.company.package.modules.BadException thrown by
+             line 12345...
+             line 123456...
+             NAME        TASK        2    localhost   RUNNING
              """
     end
 
@@ -83,10 +83,10 @@ defmodule Kconnectex.Cli.Commands.ConnectorsTest do
       }
 
       if Keyword.has_key?(opts, :trace) do
-        Map.put(t, :trace, Keyword.fetch!(opts, :trace))
+        Map.put(t, "trace", Keyword.fetch!(opts, :trace))
+      else
+        t
       end
-
-      t
     end
   end
 end
