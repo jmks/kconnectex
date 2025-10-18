@@ -42,7 +42,7 @@ defmodule Kconnectex.Cli.Table do
       end)
       |> Enum.map(&String.trim/1)
 
-    Enum.join(lines, "\n") <> "\n"
+    Enum.join(lines, "\n")
   end
 
   defp max_column_widths(column_widths, rows) do

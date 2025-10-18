@@ -7,10 +7,12 @@ defmodule Kconnectex.CLI.TableTest do
     test "formats a table" do
       table = Table.new(["abc", "def"], [["1", "1001"]])
 
-      assert Table.render(table) == """
-             abc   def
-             1     1001
-             """
+      out = Table.render(table)
+
+      assert_rendered(out, """
+      abc   def
+      1     1001
+      """)
     end
 
     test "formats subsequeant rows correctly" do
@@ -19,11 +21,14 @@ defmodule Kconnectex.CLI.TableTest do
       first = Table.render(table)
       second = Table.render_rows(table, [["narrow", "<- whitespace"]])
 
-      assert first <> second == """
-             wide-column          narrow-column
-             longer-than-column   narrow
-             narrow               <- whitespace
-             """
+      assert_rendered(
+        [first, second],
+        """
+        wide-column          narrow-column
+        longer-than-column   narrow
+        narrow               <- whitespace
+        """
+      )
     end
 
     test "truncates columns that are subsequently longer" do
@@ -32,26 +37,38 @@ defmodule Kconnectex.CLI.TableTest do
       first = Table.render(table)
       second = Table.render_rows(table, [["a much wider column"]])
 
-      assert first <> second == """
-             column
-             a short column
-             a much wide...
-             """
+      assert_rendered([first, second], """
+      column
+      a short column
+      a much wide...
+      """)
     end
 
     test "renders lines" do
       table = Table.new(["state"], [["OK"]])
 
       first = Table.render(table)
-      second = Table.render_rows(table, [["ERROR"], {:lines, ["stacktrace line 1", "stacktrace line 2"]}])
 
-      assert first <> second == """
+      second =
+        Table.render_rows(table, [["ERROR"], {:lines, ["stacktrace line 1", "stacktrace line 2"]}])
+
+      assert_rendered([first, second], """
       state
       OK
       ERROR
       stacktrace line 1
       stacktrace line 2
-      """
+      """)
     end
+  end
+
+  def assert_rendered(parts, printed) when is_list(parts) do
+    assert concat(parts) == String.trim_trailing(printed, "\n")
+  end
+
+  def assert_rendered(part, printed), do: assert_rendered([part], printed)
+
+  defp concat(parts) do
+    Enum.join(parts, "\n")
   end
 end
