@@ -10,6 +10,7 @@ defmodule Kconnectex.CLI.Commands.Connectors do
       status["connector"]["state"]
     ]
 
+    # TODO: rows should be sorted by id
     task_rows = Enum.flat_map(status["tasks"], fn task ->
       task_row = [status["name"], "TASK", to_string(task["id"]), task["worker_id"], task["state"]]
 
@@ -25,12 +26,7 @@ defmodule Kconnectex.CLI.Commands.Connectors do
     [connector | task_rows]
   end
 
-  def render(status_rows, _opts \\ []) do
-    Table.new(headers(), status_rows)
-    |> Table.render()
-  end
-
-  defp headers do
+  def headers do
     ["CONNECTOR", "TYPE", "ID", "WORKER_ID", "STATE"]
   end
 end

@@ -163,6 +163,11 @@ defmodule Kconnectex.CLI.Options do
     end
   end
 
+  defp with_command(opts, command = ["connector", "status" | _], _flags) do
+    # watch? handled above
+     %{opts | command: command}
+  end
+
   defp with_command(opts, command = ["connector", "restart" | _], flags) do
     only_failed? = Keyword.get(flags, :only_failed, false)
     include_tasks? = Keyword.get(flags, :include_tasks, false)

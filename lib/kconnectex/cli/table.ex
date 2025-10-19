@@ -1,4 +1,4 @@
-defmodule Kconnectex.Cli.Table do
+defmodule Kconnectex.CLI.Table do
   defstruct [:column_widths, :headers, :rows]
 
   @column_spacer "   "

@@ -1,7 +1,7 @@
 defmodule Kconnectex.CLI.TableTest do
   use ExUnit.Case, async: true
 
-  alias Kconnectex.Cli.Table
+  alias Kconnectex.CLI.Table
 
   describe "print/2" do
     test "formats a table" do

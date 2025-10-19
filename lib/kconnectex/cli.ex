@@ -1,5 +1,6 @@
 defmodule Kconnectex.CLI do
-  alias Kconnectex.CLI.{ConfigFile, Options}
+  alias Kconnectex.CLI.{ConfigFile, Options, Table}
+  alias Kconnectex.CLI.Watcher
 
   import Kconnectex.CLI.Help
 
@@ -230,6 +231,26 @@ defmodule Kconnectex.CLI do
     |> client()
     |> Kconnectex.Connectors.restart(connector, opts.options)
     |> display()
+  end
+
+  # --watch is always text
+  defp run(%{command: ["connector", "status", connector], url: url, watch?: true}) do
+    # prime the rendering, so we can render with headers
+    {:ok, status} = Kconnectex.Connectors.status(client(url), connector)
+    values = Kconnectex.CLI.Commands.Connectors.extract(status)
+    headers = Kconnectex.CLI.Commands.Connectors.headers()
+    table = Table.new(headers, values)
+    IO.puts(Table.render(table))
+
+    Watcher.start_link(
+      values: values,
+      call: fn -> Kconnectex.Connectors.status(client(url), connector) end,
+      transform: &Kconnectex.CLI.Commands.Connectors.extract/1,
+      render: &(Table.render_rows(table, &1))
+    )
+
+    # TODO: System.no_halt(true) not working here?
+    :timer.sleep(:infinity)
   end
 
   defp run(%{command: ["connector", "status", connector], url: url, format: :text}) do
