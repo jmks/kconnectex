@@ -246,7 +246,7 @@ defmodule Kconnectex.CLI do
       values: values,
       call: fn -> Kconnectex.Connectors.status(client(url), connector) end,
       transform: &Kconnectex.CLI.Commands.Connectors.extract/1,
-      render: &(Table.render_rows(table, &1))
+      render: &Table.render_rows(table, &1)
     )
 
     # TODO: System.no_halt(true) not working here?
@@ -256,9 +256,11 @@ defmodule Kconnectex.CLI do
   defp run(%{command: ["connector", "status", connector], url: url, format: :text}) do
     case Kconnectex.Connectors.status(client(url), connector) do
       {:ok, status} ->
-        status
-        |> Kconnectex.CLI.Commands.Connectors.extract()
-        |> Kconnectex.CLI.Commands.Connectors.render()
+        values = Kconnectex.CLI.Commands.Connectors.extract(status)
+
+        Kconnectex.CLI.Commands.Connectors.headers()
+        |> Table.new(values)
+        |> Table.render()
         |> IO.puts()
 
       otherwise ->
@@ -411,18 +413,21 @@ defmodule Kconnectex.CLI do
       end)
 
     if Enum.any?(configs_with_error) do
-      name_errors = Enum.flat_map(configs_with_error, fn config ->
-        Enum.map(config["value"]["errors"], fn error ->
-          [config["value"]["name"], error]
+      name_errors =
+        Enum.flat_map(configs_with_error, fn config ->
+          Enum.map(config["value"]["errors"], fn error ->
+            [config["value"]["name"], error]
+          end)
         end)
-      end)
 
       # TODO: Table?
       table = [["CONFIG", "ERROR"] | name_errors]
       width = table |> Enum.map(&hd/1) |> Enum.map(&String.length/1) |> Enum.max()
-      formatted = Enum.map(table, fn [name, error] ->
-        String.pad_trailing(name, width + 3) <> error
-      end)
+
+      formatted =
+        Enum.map(table, fn [name, error] ->
+          String.pad_trailing(name, width + 3) <> error
+        end)
 
       {:text, formatted}
     else

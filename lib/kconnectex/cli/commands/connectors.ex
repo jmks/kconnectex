@@ -1,6 +1,4 @@
 defmodule Kconnectex.CLI.Commands.Connectors do
-  alias Kconnectex.Cli.Table
-
   def extract(status) do
     connector = [
       status["name"],
