@@ -2,7 +2,16 @@ defmodule Kconnectex.CLI.Options do
   alias Kconnectex.CLI.ConfigFile
 
   @enforce_keys [:config]
-  defstruct [:config, url: :unset, help?: false, format: :text, command: [], options: [], errors: []]
+  defstruct [
+    :config,
+    url: :unset,
+    help?: false,
+    format: :text,
+    watch?: false,
+    command: [],
+    options: [],
+    errors: []
+  ]
 
   def extract(args) do
     case ConfigFile.read() do
@@ -20,9 +29,12 @@ defmodule Kconnectex.CLI.Options do
 
   def parse(args, config \\ %{}) do
     global_flags = [cluster: :string, help: :boolean, url: :string, json: :boolean]
+
     command_flags = [
       # connectors
       expand: :string,
+      # connector status
+      watch: :boolean,
       # connector restart
       only_failed: :boolean,
       include_tasks: :boolean,
@@ -32,7 +44,8 @@ defmodule Kconnectex.CLI.Options do
 
     %__MODULE__{
       help?: Keyword.get(parsed, :help, false),
-      format: (if Keyword.get(parsed, :json, false), do: :json, else: :text),
+      format: if(Keyword.get(parsed, :json, false), do: :json, else: :text),
+      watch?: Keyword.get(parsed, :watch, false),
       config: config
     }
     |> with_command(command, extract_flags(parsed, command_flags))
@@ -150,13 +163,22 @@ defmodule Kconnectex.CLI.Options do
     end
   end
 
+  defp with_command(opts, command = ["connector", "status" | _], _flags) do
+    # watch? handled above
+     %{opts | command: command}
+  end
+
   defp with_command(opts, command = ["connector", "restart" | _], flags) do
     only_failed? = Keyword.get(flags, :only_failed, false)
     include_tasks? = Keyword.get(flags, :include_tasks, false)
 
     new_options = opts.options
-    new_options = if only_failed?, do: Keyword.put(new_options, :only_failed, true), else: new_options
-    new_options = if include_tasks?, do: Keyword.put(new_options, :include_tasks, true), else: new_options
+
+    new_options =
+      if only_failed?, do: Keyword.put(new_options, :only_failed, true), else: new_options
+
+    new_options =
+      if include_tasks?, do: Keyword.put(new_options, :include_tasks, true), else: new_options
 
     new_flags =
       flags

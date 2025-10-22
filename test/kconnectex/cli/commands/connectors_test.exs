@@ -1,75 +1,95 @@
-defmodule Kconnectex.Cli.Commands.ConnectorsTest do
+defmodule Kconnectex.CLI.Commands.ConnectorsTest do
   use ExUnit.Case, async: true
 
+  alias Kconnectex.CLI.Table
   alias Kconnectex.CLI.Commands.Connectors
+
+  import RenderAssertions
 
   describe "render/1" do
     test "shows connector name" do
-      status = %{
-        "name" => "NAME",
-        "connector" => %{"state" => "RUNNING"},
-        "tasks" => []
-      }
-
-      assert Connectors.render(status) == """
-             NAME
-             ----
-             Connector: RUNNING
-             """
+      connector("NAME", "RUNNING")
+      |> render()
+      |> assert_rendered("""
+      CONNECTOR   TYPE        ID   WORKER_ID   STATE
+      NAME        CONNECTOR        localhost   RUNNING
+      """)
     end
 
     test "shows tasks" do
-      status = %{
-        "name" => "NAME",
-        "connector" => %{"state" => "RUNNING"},
-        "tasks" => [
-          %{"id" => "0", "state" => "PAUSED"},
-          %{"id" => "1", "state" => "STOPPED"},
-          %{"id" => "2", "state" => "RUNNING"}
+      connector("NAME", "RUNNING",
+        tasks: [
+          task(0, "PAUSED"),
+          task(1, "STOPPED"),
+          task(2, "RUNNING")
         ]
-      }
-
-      assert Connectors.render(status) == """
-             NAME
-             ----
-             Connector: RUNNING
-             Task 0: PAUSED
-             Task 1: STOPPED
-             Task 2: RUNNING
-             """
+      )
+      |> render()
+      |> assert_rendered("""
+      CONNECTOR   TYPE        ID   WORKER_ID   STATE
+      NAME        CONNECTOR        localhost   RUNNING
+      NAME        TASK        0    localhost   PAUSED
+      NAME        TASK        1    localhost   STOPPED
+      NAME        TASK        2    localhost   RUNNING
+      """)
     end
 
     test "shows task stack traces" do
-      status = %{
-        "name" => "NAME",
-        "connector" => %{"state" => "RUNNING"},
-        "tasks" => [
-          %{"id" => "0", "state" => "PAUSED"},
-          %{
-            "id" => "1",
-            "state" => "ERROR",
-            "trace" =>
+      connector("NAME", "RUNNING",
+        tasks: [
+          task(0, "PAUSED"),
+          task(1, "ERROR",
+            trace:
               "com.some.company.package.modules.BadException thrown by\nline 12345...\nline 123456..."
-          },
-          %{"id" => "2", "state" => "RUNNING"}
+          ),
+          task(2, "RUNNING")
         ]
-      }
-
-      assert Connectors.render(status) == """
-             NAME
-             ----
-             Connector: RUNNING
-             Task 0: PAUSED
-             Task 1: ERROR
-             Trace:
-             com.some.company.package.modules.BadException thrown by
-             line 12345...
-             line 123456...
-
-             Task 2: RUNNING
-             """
+      )
+      |> render()
+      |> assert_rendered("""
+      CONNECTOR   TYPE        ID   WORKER_ID   STATE
+      NAME        CONNECTOR        localhost   RUNNING
+      NAME        TASK        0    localhost   PAUSED
+      NAME        TASK        1    localhost   ERROR
+      com.some.company.package.modules.BadException thrown by
+      line 12345...
+      line 123456...
+      NAME        TASK        2    localhost   RUNNING
+      """)
     end
 
-    # defp status(name, state, tasks \\ [])
+    defp render(status) do
+      values = Connectors.extract(status)
+
+      Connectors.headers()
+      |> Table.new(values)
+      |> Table.render()
+    end
+
+    defp connector(name, state, opts \\ []) do
+      %{
+        "name" => name,
+        "connector" => %{
+          "state" => state,
+          "worker_id" => Keyword.get(opts, :worker_id, "localhost")
+        },
+        "tasks" => Keyword.get(opts, :tasks, []),
+        "type" => Keyword.get(opts, :type, "source")
+      }
+    end
+
+    defp task(id, state, opts \\ []) do
+      t = %{
+        "id" => id,
+        "state" => state,
+        "worker_id" => Keyword.get(opts, :worker_id, "localhost")
+      }
+
+      if Keyword.has_key?(opts, :trace) do
+        Map.put(t, "trace", Keyword.fetch!(opts, :trace))
+      else
+        t
+      end
+    end
   end
 end

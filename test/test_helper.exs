@@ -22,5 +22,15 @@ defmodule Fixtures do
   end
 end
 
+defmodule RenderAssertions do
+  defmacro assert_rendered(part_or_parts, printed) do
+    parts = if is_list(part_or_parts), do: part_or_parts, else: [part_or_parts]
+
+    quote do
+      assert Enum.join(unquote(parts), "\n") == String.trim_trailing(unquote(printed), "\n")
+    end
+  end
+end
+
 ExUnit.configure(exclude: :integration)
 ExUnit.start()

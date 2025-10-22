@@ -32,7 +32,7 @@ defmodule Kconnectex.ClusterTest do
     import IntegrationHelpers
 
     assert Cluster.health(Kconnectex.client("http://0.0.0.0:9999")) ==
-    {:error, :econnrefused}
+             {:error, :econnrefused}
 
     {:ok, health} = Cluster.health(connect_client())
 

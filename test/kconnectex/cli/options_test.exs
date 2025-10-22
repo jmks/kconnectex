@@ -49,6 +49,14 @@ defmodule Kconnectex.CLI.OptionsTest do
       assert opts.command == ["cluster", "info"]
       assert opts.errors == []
     end
+
+    test "--watch is false by default" do
+      refute Options.parse([]).watch?
+    end
+
+    test "--watch" do
+      assert Options.parse(["--watch"]).watch?
+    end
   end
 
   describe "connectors" do
@@ -89,7 +97,15 @@ defmodule Kconnectex.CLI.OptionsTest do
     end
 
     test "connector restart :name --only-failed" do
-      opts = Options.parse(["--url", "example.com", "connector", "restart", "debezium", "--only-failed"])
+      opts =
+        Options.parse([
+          "--url",
+          "example.com",
+          "connector",
+          "restart",
+          "debezium",
+          "--only-failed"
+        ])
 
       assert Enum.empty?(opts.errors)
       assert opts.command == ["connector", "restart", "debezium"]
@@ -97,7 +113,15 @@ defmodule Kconnectex.CLI.OptionsTest do
     end
 
     test "connector restart :name --include-tasks" do
-      opts = Options.parse(["--url", "example.com", "connector", "restart", "debezium", "--include-tasks"])
+      opts =
+        Options.parse([
+          "--url",
+          "example.com",
+          "connector",
+          "restart",
+          "debezium",
+          "--include-tasks"
+        ])
 
       assert Enum.empty?(opts.errors)
       assert opts.command == ["connector", "restart", "debezium"]
@@ -105,7 +129,16 @@ defmodule Kconnectex.CLI.OptionsTest do
     end
 
     test "connector restart :name --only-failed --include-tasks" do
-      opts = Options.parse(["--url", "example.com", "connector", "restart", "debezium", "--include-tasks", "--only-failed"])
+      opts =
+        Options.parse([
+          "--url",
+          "example.com",
+          "connector",
+          "restart",
+          "debezium",
+          "--include-tasks",
+          "--only-failed"
+        ])
 
       assert Enum.empty?(opts.errors)
       assert opts.command == ["connector", "restart", "debezium"]

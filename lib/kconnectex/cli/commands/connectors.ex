@@ -1,31 +1,38 @@
 defmodule Kconnectex.CLI.Commands.Connectors do
-  def render(status) do
-    tasks =
-      Enum.flat_map(status["tasks"], fn task ->
-        state = "Task #{task["id"]}: #{task["state"]}"
+  def extract(status) do
+    connector = [
+      status["name"],
+      "CONNECTOR",
+      "",
+      status["connector"]["worker_id"],
+      status["connector"]["state"]
+    ]
+
+    task_rows =
+      status["tasks"]
+      |> Enum.sort_by(fn task -> task["id"] end)
+      |> Enum.flat_map(fn task ->
+        task_row = [
+          status["name"],
+          "TASK",
+          to_string(task["id"]),
+          task["worker_id"],
+          task["state"]
+        ]
 
         if Map.has_key?(task, "trace") do
-          formatted = String.split(task["trace"], "\n", trim: true)
-          trace = ["Trace:", join(formatted)]
+          trace = String.split(task["trace"], "\n")
 
-          [state | trace]
+          [task_row | [{:lines, trace}]]
         else
-          [state]
+          [task_row]
         end
       end)
 
-    join([
-      status["name"],
-      String.duplicate("-", String.length(status["name"])),
-      "Connector: " <> status["connector"]["state"]
-      | tasks
-    ])
+    [connector | task_rows]
   end
 
-  defp join(list, sep \\ "\n") do
-    binary =
-      list |> Enum.intersperse(sep) |> :erlang.iolist_to_binary()
-
-    binary <> sep
+  def headers do
+    ["CONNECTOR", "TYPE", "ID", "WORKER_ID", "STATE"]
   end
 end

@@ -1,5 +1,6 @@
 defmodule Kconnectex.CLI do
-  alias Kconnectex.CLI.{ConfigFile, Options}
+  alias Kconnectex.CLI.{ConfigFile, Options, Table}
+  alias Kconnectex.CLI.Watcher
 
   import Kconnectex.CLI.Help
 
@@ -232,11 +233,34 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
+  # --watch is always text
+  defp run(%{command: ["connector", "status", connector], url: url, watch?: true}) do
+    # prime the rendering, so we can render with headers
+    {:ok, status} = Kconnectex.Connectors.status(client(url), connector)
+    values = Kconnectex.CLI.Commands.Connectors.extract(status)
+    headers = Kconnectex.CLI.Commands.Connectors.headers()
+    table = Table.new(headers, values)
+    IO.puts(Table.render(table))
+
+    Watcher.start_link(
+      values: values,
+      call: fn -> Kconnectex.Connectors.status(client(url), connector) end,
+      transform: &Kconnectex.CLI.Commands.Connectors.extract/1,
+      render: &Table.render_rows(table, &1)
+    )
+
+    # TODO: System.no_halt(true) not working here?
+    :timer.sleep(:infinity)
+  end
+
   defp run(%{command: ["connector", "status", connector], url: url, format: :text}) do
     case Kconnectex.Connectors.status(client(url), connector) do
       {:ok, status} ->
-        status
-        |> Kconnectex.CLI.Commands.Connectors.render()
+        values = Kconnectex.CLI.Commands.Connectors.extract(status)
+
+        Kconnectex.CLI.Commands.Connectors.headers()
+        |> Table.new(values)
+        |> Table.render()
         |> IO.puts()
 
       otherwise ->
@@ -389,18 +413,21 @@ defmodule Kconnectex.CLI do
       end)
 
     if Enum.any?(configs_with_error) do
-      name_errors = Enum.flat_map(configs_with_error, fn config ->
-        Enum.map(config["value"]["errors"], fn error ->
-          [config["value"]["name"], error]
+      name_errors =
+        Enum.flat_map(configs_with_error, fn config ->
+          Enum.map(config["value"]["errors"], fn error ->
+            [config["value"]["name"], error]
+          end)
         end)
-      end)
 
       # TODO: Table?
       table = [["CONFIG", "ERROR"] | name_errors]
       width = table |> Enum.map(&hd/1) |> Enum.map(&String.length/1) |> Enum.max()
-      formatted = Enum.map(table, fn [name, error] ->
-        String.pad_trailing(name, width + 3) <> error
-      end)
+
+      formatted =
+        Enum.map(table, fn [name, error] ->
+          String.pad_trailing(name, width + 3) <> error
+        end)
 
       {:text, formatted}
     else
