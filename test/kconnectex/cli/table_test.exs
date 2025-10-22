@@ -3,6 +3,8 @@ defmodule Kconnectex.CLI.TableTest do
 
   alias Kconnectex.CLI.Table
 
+  import RenderAssertions
+
   describe "print/2" do
     test "formats a table" do
       table = Table.new(["abc", "def"], [["1", "1001"]])
@@ -60,15 +62,5 @@ defmodule Kconnectex.CLI.TableTest do
       stacktrace line 2
       """)
     end
-  end
-
-  def assert_rendered(parts, printed) when is_list(parts) do
-    assert concat(parts) == String.trim_trailing(printed, "\n")
-  end
-
-  def assert_rendered(part, printed), do: assert_rendered([part], printed)
-
-  defp concat(parts) do
-    Enum.join(parts, "\n")
   end
 end
