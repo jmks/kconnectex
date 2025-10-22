@@ -40,10 +40,9 @@ defmodule Kconnectex.CLI.Watcher do
   end
 
   # TODO: More specific error message
-  # TODO: same error appears to be seen as "new"
   defp diff(previous, {:error, reason}, _transformer) do
     case previous do
-      {:error, ^reason} ->
+      [{:error, ^reason}] ->
         {[{:error, reason}], []}
 
       _otherwise ->
