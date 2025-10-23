@@ -37,7 +37,7 @@ defmodule Kconnectex.CLI.Options do
       watch: :boolean,
       # connector restart
       only_failed: :boolean,
-      include_tasks: :boolean,
+      include_tasks: :boolean
     ]
 
     {parsed, command, invalid} = OptionParser.parse(args, strict: global_flags ++ command_flags)
@@ -165,7 +165,7 @@ defmodule Kconnectex.CLI.Options do
 
   defp with_command(opts, command = ["connector", "status" | _], _flags) do
     # watch? handled above
-     %{opts | command: command}
+    %{opts | command: command}
   end
 
   defp with_command(opts, command = ["connector", "restart" | _], flags) do
