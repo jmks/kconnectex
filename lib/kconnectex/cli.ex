@@ -112,7 +112,22 @@ defmodule Kconnectex.CLI do
     |> display()
   end
 
-  defp run(%{command: ["loggers"], url: url}) do
+  defp run(%{command: ["loggers"], url: url, format: :text}) do
+    case Kconnectex.Admin.loggers(client(url)) do
+      {:ok, loggers} ->
+        values = Kconnectex.CLI.Commands.Loggers.extract(loggers)
+
+        Kconnectex.CLI.Commands.Loggers.headers()
+        |> Table.new(values)
+        |> Table.render()
+        |> IO.puts()
+
+      otherwise ->
+        display(otherwise)
+    end
+  end
+
+  defp run(%{command: ["loggers"], url: url, format: :json}) do
     client(url)
     |> Kconnectex.Admin.loggers()
     |> display()
