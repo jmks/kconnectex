@@ -5,7 +5,7 @@ defmodule Kconnectex.CLI.TableTest do
 
   import RenderAssertions
 
-  describe "print/2" do
+  describe "render/2" do
     test "formats a table" do
       table = Table.new(["abc", "def"], [["1", "1001"]])
 
@@ -17,6 +17,25 @@ defmodule Kconnectex.CLI.TableTest do
       """)
     end
 
+    test "formats a column by header metadata" do
+      headers = [%{name: "City", max_width: 5}, "Team"]
+      rows = [
+        ["Tdot", "Blue Jays"],
+        ["LA", "Dodgers"]
+      ]
+      table = Table.new(headers, rows)
+
+      out = Table.render(table)
+
+      assert_rendered(out, """
+      City    Team
+      Tdot    Blue Jays
+      LA      Dodgers
+      """)
+    end
+  end
+
+  describe "render_rows/2" do
     test "formats subsequeant rows correctly" do
       table = Table.new(["wide-column", "narrow-column"], [["longer-than-column", "narrow"]])
 
