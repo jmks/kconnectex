@@ -185,7 +185,7 @@ defmodule Kconnectex.CLI do
   defp run(opts = %{command: ["connectors"], watch?: true}) do
     call = fn -> Kconnectex.Connectors.list(client(opts.url), expand: :status) end
 
-    transformer = fn list ->
+    transform = fn list ->
       list
       |> Map.values()
       |> Enum.map(& &1["status"])
@@ -195,7 +195,7 @@ defmodule Kconnectex.CLI do
 
     # prime the rendering, so we can render with headers
     {:ok, list} = call.()
-    values = transformer.(list)
+    values = transform.(list)
     headers = Kconnectex.CLI.Commands.Connectors.headers()
     table = Table.new(headers, values)
     IO.puts(Table.render(table))
@@ -203,7 +203,7 @@ defmodule Kconnectex.CLI do
     Watcher.start_link(
       values: values,
       call: call,
-      transform: transformer,
+      transform: transform,
       render: &Table.render_rows(table, &1)
     )
 
@@ -278,17 +278,20 @@ defmodule Kconnectex.CLI do
   end
 
   defp run(%{command: ["connector", "status", connector], url: url, watch?: true}) do
+    call = fn -> Kconnectex.Connectors.status(client(url), connector) end
+    transform = &Kconnectex.CLI.Commands.Connectors.extract/1
+
     # prime the rendering, so we can render with headers
-    {:ok, status} = Kconnectex.Connectors.status(client(url), connector)
-    values = Kconnectex.CLI.Commands.Connectors.extract(status)
+    {:ok, status} = call.()
+    values = transform.(status)
     headers = Kconnectex.CLI.Commands.Connectors.headers()
     table = Table.new(headers, values)
     IO.puts(Table.render(table))
 
     Watcher.start_link(
       values: values,
-      call: fn -> Kconnectex.Connectors.status(client(url), connector) end,
-      transform: &Kconnectex.CLI.Commands.Connectors.extract/1,
+      call: call,
+      transform: transform,
       render: &Table.render_rows(table, &1)
     )
 
