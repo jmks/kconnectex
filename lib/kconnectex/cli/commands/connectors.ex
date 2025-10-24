@@ -35,10 +35,10 @@ defmodule Kconnectex.CLI.Commands.Connectors do
   def headers do
     [
       "CONNECTOR",
-      %{name: "TYPE", max_width: String.length("CONNECTOR")},
+      %{name: "TYPE", min_width: String.length("CONNECTOR")},
       "ID",
       "WORKER_ID",
-      %{name: "STATE", max_width: String.length("RUNNING")}
+      %{name: "STATE", min_width: String.length("RUNNING")}
     ]
   end
 end

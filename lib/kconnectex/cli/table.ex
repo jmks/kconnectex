@@ -68,7 +68,7 @@ defmodule Kconnectex.CLI.Table do
 
   defp header_widths(headers) do
     Enum.map(headers, fn
-      %{max_width: width} -> width
+      %{min_width: width} -> width
       %{name: name} -> String.length(name)
       name -> String.length(name)
     end)

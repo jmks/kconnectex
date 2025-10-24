@@ -18,7 +18,7 @@ defmodule Kconnectex.CLI.TableTest do
     end
 
     test "formats a column by header metadata" do
-      headers = [%{name: "City", max_width: 5}, "Team"]
+      headers = [%{name: "City", min_width: 5}, "Team"]
       rows = [
         ["Tdot", "Blue Jays"],
         ["LA", "Dodgers"]
