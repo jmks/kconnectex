@@ -149,7 +149,7 @@ defmodule Kconnectex.CLI.Options do
       end)
 
     error = Enum.find(expands, &match?({:error, _}, &1))
-    opts = invalid_flag_errors(opts, Keyword.delete(flags, :expand))
+    opts = invalid_flag_errors(opts, flags |> Keyword.delete(:expand) |> Keyword.delete(:watch))
 
     if error do
       {:error, unknown} = error

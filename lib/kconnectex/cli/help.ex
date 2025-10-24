@@ -108,8 +108,16 @@ defmodule Kconnectex.CLI.Help do
     IO.puts("""
     #{help_header()}
 
-    connectors
+    connectors [--expand] [--watch]
       Lists connectors.
+
+      --expand
+        Includes additional connector information.
+        Values are a comma-separated list containing [status, info].
+
+      --watch
+        Watch for changes of the connectors statuses.
+        --expand is ignored
 
     connector config CONNECTOR
       Get configuration for the given CONNECTOR.

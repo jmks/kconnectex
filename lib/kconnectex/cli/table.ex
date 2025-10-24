@@ -6,8 +6,8 @@ defmodule Kconnectex.CLI.Table do
   def new(headers, rows \\ []) do
     column_widths =
       max_column_widths(
-        List.duplicate(0, length(headers)),
-        [headers | rows]
+        header_widths(headers),
+        rows
       )
 
     %__MODULE__{
@@ -18,7 +18,7 @@ defmodule Kconnectex.CLI.Table do
   end
 
   def render(table) do
-    render_rows(table, [table.headers | table.rows])
+    render_rows(table, [header_values(table.headers) | table.rows])
   end
 
   def render_rows(table, rows) do
@@ -64,5 +64,20 @@ defmodule Kconnectex.CLI.Table do
     value
     |> to_string()
     |> String.length()
+  end
+
+  defp header_widths(headers) do
+    Enum.map(headers, fn
+      %{min_width: width} -> width
+      %{name: name} -> String.length(name)
+      name -> String.length(name)
+    end)
+  end
+
+  defp header_values(headers) do
+    Enum.map(headers, fn
+      %{name: name} -> name
+      name -> name
+    end)
   end
 end
